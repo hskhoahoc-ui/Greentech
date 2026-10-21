@@ -150,7 +150,7 @@ app.post('/api/change-password', async (req, res) => {
     const { data: user } = await supabase.from('app_users').select('*').eq('username', username).eq('password', oldPassword).single();
     
     if (!user) {
-        return.json({ success: false, message: 'Mật khẩu cũ không đúng!' });
+res.json({ success: false, message: 'Mật khẩu cũ không đúng!' });
     }
 
     await supabase.from('app_users').update({ password: newPassword }).eq('username', username);
