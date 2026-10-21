@@ -55,8 +55,8 @@
         <!-- SECTION 1: DANH MỤC SẢN PHẨM -->
         <h3 id="products">Danh Mục Sản Phẩm</h3>
         <div class="grid-3">
-            <% categories.forEach(cat => { %>
-                <div class="card" onclick="window.location.href='/category/<%= cat.id %>'">
+<% (categories || []).forEach(cat => { %>
+<div class="card" onclick="window.location.href='/category/<%= cat.id %>'">
                     <img src="<%= cat.avatar_url %>" alt="<%= cat.name %>">
                     <h4><%= cat.name %></h4>
                 </div>
