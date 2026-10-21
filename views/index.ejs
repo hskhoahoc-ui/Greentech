@@ -27,11 +27,11 @@
         .status-expired { color: red; font-weight: bold; }
         .alert-popup { background: #ffcccc; color: #cc0000; padding: 10px; border-radius: 5px; margin-bottom: 15px; }
         
-        /* Modal đăng nhập */
+        /* Modal chung */
         .modal { display: none; position: fixed; z-index: 10; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
-        .modal-content { background: white; padding: 30px; border-radius: 8px; width: 350px; text-align: center; }
+        .modal-content { background: white; padding: 30px; border-radius: 8px; width: 400px; text-align: center; }
         .modal-content input { width: 90%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; }
-        .modal-content button { padding: 10px 20px; background: #004488; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .modal-content button { padding: 10px 20px; background: #004488; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 5px; }
     </style>
 </head>
 <body>
@@ -46,7 +46,7 @@
             <a onclick="switchTab('services')">Dịch vụ</a>
             <a onclick="switchTab('projects')">Khách hàng dự án</a>
             <a onclick="switchTab('support')">Hỗ trợ khách hàng</a>
-            <% if (!isAdmin) { %>
+            <% if (typeof isAdmin === 'undefined' || !isAdmin) { %>
                 <a onclick="openLoginModal()" style="color: #ffcc00;">Đăng nhập Admin</a>
             <% } else { %>
                 <a onclick="openAdminPanel()" style="color: #00ffcc;">Quản trị tài khoản</a>
@@ -58,7 +58,8 @@
     <div class="container">
         
         <!-- Cảnh báo Bảo hành hết hạn -->
-        <% const expiredProjects = projects.filter(p => p.isExpired); %>
+        <% const safeProjects = projects || []; %>
+        <% const expiredProjects = safeProjects.filter(p => p.isExpired); %>
         <% if (expiredProjects.length > 0) { %>
             <div class="alert-popup">
                 <strong>🔔 THÔNG BÁO BẢO HÀNH:</strong> Có <%= expiredProjects.length %> dự án đã hết hạn bảo hành/bảo dưỡng!
@@ -69,7 +70,7 @@
         <div id="tab-products" class="tab-content active">
             <h3>Danh Mục Sản Phẩm</h3>
             <div class="grid-3">
-                <% categories.forEach(cat => { %>
+                <% (categories || []).forEach(cat => { %>
                     <div class="card" onclick="window.location.href='/category/<%= cat.id %>'">
                         <img src="<%= cat.avatar_url %>" alt="<%= cat.name %>">
                         <h4><%= cat.name %></h4>
@@ -91,12 +92,12 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <% services.forEach(s => { %>
+                    <% (services || []).forEach(s => { %>
                         <tr>
                             <td><%= s.service_type %></td>
                             <td><%= s.content %></td>
                             <td><%= s.warranty_maintenance %></td>
-                            <td><%= Number(s.price).toLocaleString('vi-VN') %> VNĐ</td>
+                            <td><%= Number(s.price || 0).toLocaleString('vi-VN') %> VNĐ</td>
                         </tr>
                     <% }) %>
                 </tbody>
@@ -117,7 +118,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <% projects.forEach(p => { %>
+                    <% safeProjects.forEach(p => { %>
                         <tr>
                             <td><%= p.customer_name %></td>
                             <td><%= p.project_name %></td>
@@ -155,13 +156,34 @@
         </div>
     </div>
 
+    <!-- Modal Quản trị tài khoản (Dành cho Admin) -->
+    <div id="adminPanelModal" class="modal">
+        <div class="modal-content" style="width: 450px;">
+            <h3>Quản Trị Tài Khoản Admin</h3>
+            <hr style="margin: 15px 0;">
+            <h4>Đổi Mật Khẩu</h4>
+            <input type="password" id="oldPassword" placeholder="Mật khẩu cũ"><br>
+            <input type="password" id="newPassword" placeholder="Mật khẩu mới"><br>
+            <button onclick="changePassword()">Cập Nhật Mật Khẩu</button>
+            
+            <hr style="margin: 20px 0;">
+            <h4>Tạo Tài Khoản Quản Trị Mới</h4>
+            <input type="text" id="newAdminUser" placeholder="Tài khoản mới"><br>
+            <input type="password" id="newAdminPass" placeholder="Mật khẩu mới"><br>
+            <button onclick="createAdmin()" style="background: #28a745;">Tạo Tài Khoản</button>
+            <br><br>
+            <button onclick="closeAdminPanel()" style="background: #6c757d;">Đóng Quản Trị</button>
+        </div>
+    </div>
+
     <script>
-        // Hàm chuyển đổi qua lại giữa các Tab
+        // Hàm chuyển đổi tab
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.getElementById('tab-' + tabName).classList.add('active');
         }
 
+        // Modal Đăng nhập
         function openLoginModal() { document.getElementById('loginModal').style.display = 'flex'; }
         function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; }
 
@@ -187,8 +209,38 @@
             window.location.reload();
         }
 
-        function openAdminPanel() {
-            alert('Chức năng quản trị tài khoản, đổi mật khẩu, tạo/xóa user đang hoạt động theo phân quyền tài khoản admin!');
+        // Modal Quản trị tài khoản Admin
+        function openAdminPanel() { document.getElementById('adminPanelModal').style.display = 'flex'; }
+        function closeAdminPanel() { document.getElementById('adminPanelModal').style.display = 'none'; }
+
+        async function changePassword() {
+            const oldPassword = document.getElementById('oldPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const res = await fetch('/api/change-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ oldPassword, newPassword })
+            });
+            const data = await res.json();
+            alert(data.message);
+            if (data.success) { window.location.reload(); }
+        }
+
+        async function createAdmin() {
+            const username = document.getElementById('newAdminUser').value;
+            const password = document.getElementById('newAdminPass').value;
+            const res = await fetch('/api/users/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert('Tạo tài khoản quản trị thành công!');
+                window.location.reload();
+            } else {
+                alert('Lỗi: ' + data.message);
+            }
         }
     </script>
 </body>
