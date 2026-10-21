@@ -123,7 +123,53 @@ app.get('/api/export-revenue-excel', async (req, res) => {
     await workbook.xlsx.write(res);
     res.end();
 });
+// --- XỬ LÝ ĐĂNG NHẬP & QUẢN LÝ TÀI KHOẢN ADMIN ---
+app.post('/api/login', async (req, res) => {
+    const { username, password } = req.body;
+    const { data: user, error } = await supabase.from('app_users').select('*').eq('username', username).eq('password', password).single();
+    
+    if (error || !user) {
+        return res.json({ success: false, message: 'Sai tên đăng nhập hoặc mật khẩu!' });
+    }
+    
+    // Lưu phiên đăng nhập đơn giản bằng session hoặc cookie/flag (ở đây dùng biến tạm hoặc gửi json)
+    isAdminLoggedIn = true;
+    currentUsername = user.username;
+    res.json({ success: true });
+});
 
+app.post('/api/logout', (req, res) => {
+    isAdminLoggedIn = false;
+    currentUsername = null;
+    res.json({ success: true });
+});
+
+// Đổi mật khẩu
+app.post('/api/change-password', async (req, res) => {
+    const { username, oldPassword, newPassword } = req.body;
+    const { data: user } = await supabase.from('app_users').select('*').eq('username', username).eq('password', oldPassword).single();
+    
+    if (!user) {
+        return.json({ success: false, message: 'Mật khẩu cũ không đúng!' });
+    }
+
+    await supabase.from('app_users').update({ password: newPassword }).eq('username', username);
+    res.json({ success: true, message: 'Đổi mật khẩu thành công!' });
+});
+
+// Thêm / Sửa / Xóa tài khoản admin khác
+app.post('/api/users/save', async (req, res) => {
+    const { username, password } = req.body;
+    const { error } = await supabase.from('app_users').insert([{ username, password, role: 'admin' }]);
+    if (error) return res.json({ success: false, message: error.message });
+    res.json({ success: true });
+});
+
+app.post('/api/users/delete', async (req, res) => {
+    const { id } = req.body;
+    await supabase.from('app_users').delete().eq('id', id);
+    res.json({ success: true });
+});
 // --- API XUẤT KHO VÀ GIẢM TRỪ TỒN KHO ---
 app.post('/api/export-warehouse', async (req, res) => {
     const { quote_id, customer_name, address, phone, project_name, items } = req.body;
