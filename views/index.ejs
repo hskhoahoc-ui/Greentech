@@ -2,13 +2,17 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Công ty Thiết Bị Điện & Năng Lượng</title>
+    <title>CÔNG TY TNHH KỸ THUẬT TỰ ĐỘNG HOÁ XANH</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f6f9; }
-        header { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background: #004488; color: white; flex-wrap: wrap; }
-        header h2 { font-size: 1.2rem; margin: 0; }
+        header { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background: #004488; color: white; flex-wrap: wrap; gap: 15px; }
+        .company-info { display: flex; align-items: center; gap: 15px; }
+        .company-logo { height: 55px; width: 55px; object-fit: contain; background: white; border-radius: 6px; padding: 2px; }
+        .company-title { font-size: 1.15rem; margin: 0 0 4px 0; text-transform: uppercase; font-weight: bold; }
+        .company-sub { font-size: 0.85rem; margin: 0; opacity: 0.9; }
+
         nav.menu { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
-        nav.menu a { color: white; text-decoration: none; font-size: 0.8rem; font-weight: bold; cursor: pointer; padding: 5px 8px; border-radius: 4px; background: rgba(255,255,255,0.1); }
+        nav.menu a { color: white; text-decoration: none; font-size: 0.8rem; font-weight: bold; cursor: pointer; padding: 6px 10px; border-radius: 4px; background: rgba(255,255,255,0.1); }
         nav.menu a:hover, nav.menu a.active-tab { background: #002244; color: #ffcc00; }
         
         .container { max-width: 1200px; margin: 25px auto; padding: 0 20px; }
@@ -36,7 +40,7 @@
         .modal-content input { width: 90%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 4px; }
         .modal-content button { padding: 10px 20px; background: #004488; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 5px; }
 
-        /* Định dạng khi in giấy A4 */
+        /* Định dạng in khổ A4 */
         @media print {
             body * { visibility: hidden; }
             #tab-quotes, #tab-quotes * { visibility: visible; }
@@ -48,7 +52,17 @@
 <body>
 
     <header>
-        <h2>THIẾT BỊ ĐIỆN & NLMT</h2>
+        <div class="company-info">
+            <!-- Vị trí Logo: Bạn có thể để ảnh tại public/images/logo.png hoặc dán URL ảnh vào src -->
+            <img src="/images/logo.png" onerror="this.src='https://via.placeholder.com/60?text=LOGO'" alt="Logo" class="company-logo">
+            <div>
+                <h2 class="company-title">CÔNG TY TNHH KỸ THUẬT TỰ ĐỘNG HOÁ XANH</h2>
+                <p class="company-sub">
+                    📍 Địa chỉ: 263/16, ấp Hoà Đông, xã Phú Hoà, tỉnh An Giang &nbsp;|&nbsp; ☎️ SĐT: 0350.274.913
+                </p>
+            </div>
+        </div>
+        
         <nav class="menu">
             <a id="m-products" onclick="switchTab('products')" class="active-tab">Sản Phẩm</a>
             <a id="m-services" onclick="switchTab('services')">Dịch Vụ</a>
@@ -63,7 +77,7 @@
                 <a onclick="openAdminPanel()" style="color: #00ffcc;">Quản Trị</a>
                 <a onclick="logout()" style="color: #ff9999;">Đăng Xuất</a>
             <% } else { %>
-                <a onclick="openLoginModal()" style="color: #ffcc00;">Đăng Nhập</a>
+                <a onclick="openLoginModal()" style="color: #ffcc00;">Đăng Nhập Admin</a>
             <% } %>
         </nav>
     </header>
@@ -78,7 +92,7 @@
             </div>
         <% } %>
 
-        <!-- TAB 1: SẢN PHẨM (Hỗ trợ thêm, sửa, xóa danh mục sản phẩm) -->
+        <!-- TAB 1: SẢN PHẨM -->
         <div id="tab-products" class="tab-content active">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h3>Danh Mục Sản Phẩm</h3>
@@ -161,7 +175,7 @@
         </div>
 
         <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
-            <!-- TAB 4: BÁO GIÁ (Chọn sản phẩm + Khảo sát + Thi công + In A4) -->
+            <!-- TAB 4: BÁO GIÁ -->
             <div id="tab-quotes" class="tab-content">
                 <h3>Lập & In Báo Giá (Khổ A4)</h3>
                 <div class="form-box">
@@ -213,7 +227,7 @@
                 </table>
             </div>
 
-            <!-- TAB 5: XUẤT KHO (Chọn từ Mã Báo Giá hoặc chọn trực tiếp, trừ tồn kho & in phiếu) -->
+            <!-- TAB 5: XUẤT KHO -->
             <div id="tab-warehouse" class="tab-content">
                 <h3>Quản Lý Phiếu Xuất Kho</h3>
                 <div class="form-box">
@@ -267,7 +281,7 @@
                 </table>
             </div>
 
-            <!-- TAB 7: DOANH THU (Có nút xuất file Excel báo cáo doanh thu & chi phí) -->
+            <!-- TAB 7: DOANH THU -->
             <div id="tab-revenue" class="tab-content">
                 <h3>Quản Lý Doanh Thu & Báo Cáo</h3>
                 <div style="margin-bottom: 20px;">
@@ -359,7 +373,6 @@
         function openAdminPanel() { document.getElementById('adminPanelModal').style.display = 'flex'; }
         function closeAdminPanel() { document.getElementById('adminPanelModal').style.display = 'none'; }
 
-        // Quản lý Danh Mục Sản Phẩm
         function openCategoryModal() {
             document.getElementById('catModalTitle').innerText = 'Thêm Danh Mục Mới';
             document.getElementById('catId').value = '';
@@ -385,10 +398,7 @@
             const name = document.getElementById('catName').value.trim();
             const avatar_url = document.getElementById('catAvatar').value.trim();
 
-            if (!name) {
-                alert('Vui lòng nhập tên danh mục!');
-                return;
-            }
+            if (!name) { alert('Vui lòng nhập tên danh mục!'); return; }
 
             const res = await fetch('/api/categories/save', {
                 method: 'POST',
@@ -396,12 +406,8 @@
                 body: JSON.stringify({ id: id || null, name, avatar_url })
             });
             const data = await res.json();
-            if (data.success) {
-                alert('Lưu danh mục thành công!');
-                window.location.reload();
-            } else {
-                alert('Lỗi: ' + data.message);
-            }
+            if (data.success) { alert('Lưu danh mục thành công!'); window.location.reload(); }
+            else { alert('Lỗi: ' + data.message); }
         }
 
         async function deleteCategory(id) {
@@ -412,12 +418,8 @@
                 body: JSON.stringify({ id })
             });
             const data = await res.json();
-            if (data.success) {
-                alert('Xóa danh mục thành công!');
-                window.location.reload();
-            } else {
-                alert('Lỗi: ' + data.message);
-            }
+            if (data.success) { alert('Xóa danh mục thành công!'); window.location.reload(); }
+            else { alert('Lỗi: ' + data.message); }
         }
 
         async function submitLogin() {
