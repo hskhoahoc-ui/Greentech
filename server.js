@@ -9,7 +9,43 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
 
-// Middleware / Route xử lý đăng nhập Admin kết nối Supabase
+// --- KHAI BÁO BIẾN TOÀN CỤC QUẢN LÝ PHIÊN ĐĂNG NHẬP ---
+let isAdminLoggedIn = false;
+let currentUsername = null;
+
+// --- TRANG CHỦ & DANH MỤC KHÁCH XEM ---
+app.get('/', async (req, res) => {
+    const { data: categories } = await supabase.from('categories').select('*');
+    const { data: services } = await supabase.from('services').select('*');
+    const { data: projects } = await supabase.from('project_customers').select('*');
+
+    // Tính trạng thái bảo hành
+    const now = new Date();
+    const updatedProjects = (projects || []).map(p => {
+        const compDate = new Date(p.completion_date);
+        const expiryDate = new Date(compDate.setMonth(compDate.getMonth() + p.warranty_months));
+        const isExpired = now > expiryDate;
+        return { ...p, isExpired, expiryDate: expiryDate.toISOString().split('T')[0] };
+    });
+
+    res.render('index', { 
+        categories: categories || [], 
+        services: services || [], 
+        projects: updatedProjects,
+        isAdmin: isAdminLoggedIn 
+    });
+});
+
+// Web con: Hiển thị sản phẩm theo danh mục (Lưới 3 ô / dòng, Không hiển thị giá nhập)
+app.get('/category/:id', async (req, res) => {
+    const categoryId = req.params.id;
+    const { data: category } = await supabase.from('categories').select('*').eq('id', categoryId).single();
+    const { data: products } = await supabase.from('products').select('id, name, image_url, description, quantity, selling_price').eq('category_id', categoryId);
+
+    res.render('category', { category, products: products || [] });
+});
+
+// --- XỬ LÝ ĐĂNG NHẬP & QUẢN LÝ TÀI KHOẢN ADMIN ---
 app.post('/api/login', async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -36,36 +72,49 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// --- TRANG CHỦ & DANH MỤC KHÁCH XEM ---
-app.get('/', async (req, res) => {
-    const { data: categories } = await supabase.from('categories').select('*');
-    const { data: services } = await supabase.from('services').select('*');
-    const { data: projects } = await supabase.from('project_customers').select('*');
-
-    // Tính trạng thái bảo hành
-    const now = new Date();
-    const updatedProjects = (projects || []).map(p => {
-        const compDate = new Date(p.completion_date);
-        const expiryDate = new Date(compDate.setMonth(compDate.getMonth() + p.warranty_months));
-        const isExpired = now > expiryDate;
-        return { ...p, isExpired, expiryDate: expiryDate.toISOString().split('T')[0] };
-    });
-
-    res.render('index', { 
-        categories, 
-        services: services || [], 
-        projects: updatedProjects,
-        isAdmin: isAdminLoggedIn 
-    });
+app.post('/api/logout', (req, res) => {
+    isAdminLoggedIn = false;
+    currentUsername = null;
+    res.json({ success: true });
 });
 
-// Web con: Hiển thị sản phẩm theo danh mục (Lưới 3 ô / dòng, Không hiển thị giá nhập)
-app.get('/category/:id', async (req, res) => {
-    const categoryId = req.params.id;
-    const { data: category } = await supabase.from('categories').select('*').eq('id', categoryId).single();
-    const { data: products } = await supabase.from('products').select('id, name, image_url, description, quantity, selling_price').eq('category_id', categoryId);
+// Đổi mật khẩu
+app.post('/api/change-password', async (req, res) => {
+    if (!isAdminLoggedIn || !currentUsername) {
+        return res.json({ success: false, message: 'Bạn chưa đăng nhập quyền admin!' });
+    }
 
-    res.render('category', { category, products: products || [] });
+    const { oldPassword, newPassword } = req.body;
+    const { data: user } = await supabase.from('app_users').select('*').eq('username', currentUsername).eq('password', oldPassword).single();
+    
+    if (!user) {
+        return res.json({ success: false, message: 'Mật khẩu cũ không đúng!' });
+    }
+
+    await supabase.from('app_users').update({ password: newPassword }).eq('username', currentUsername);
+    return res.json({ success: true, message: 'Đổi mật khẩu thành công!' });
+});
+
+// Thêm tài khoản admin mới
+app.post('/api/users/save', async (req, res) => {
+    if (!isAdminLoggedIn) {
+        return res.json({ success: false, message: 'Không có quyền thực hiện!' });
+    }
+
+    const { username, password } = req.body;
+    const { error } = await supabase.from('app_users').insert([{ username, password, role: 'admin' }]);
+    if (error) return res.json({ success: false, message: error.message });
+    res.json({ success: true });
+});
+
+app.post('/api/users/delete', async (req, res) => {
+    if (!isAdminLoggedIn) {
+        return res.json({ success: false, message: 'Không có quyền thực hiện!' });
+    }
+
+    const { id } = req.body;
+    await supabase.from('app_users').delete().eq('id', id);
+    res.json({ success: true });
 });
 
 // --- TAB CHI PHÍ & DOANH THU EXCEL EXPORT ---
@@ -137,53 +186,7 @@ app.get('/api/export-revenue-excel', async (req, res) => {
     await workbook.xlsx.write(res);
     res.end();
 });
-// --- XỬ LÝ ĐĂNG NHẬP & QUẢN LÝ TÀI KHOẢN ADMIN ---
-app.post('/api/login', async (req, res) => {
-    const { username, password } = req.body;
-    const { data: user, error } = await supabase.from('app_users').select('*').eq('username', username).eq('password', password).single();
-    
-    if (error || !user) {
-        return res.json({ success: false, message: 'Sai tên đăng nhập hoặc mật khẩu!' });
-    }
-    
-    // Lưu phiên đăng nhập đơn giản bằng session hoặc cookie/flag (ở đây dùng biến tạm hoặc gửi json)
-    isAdminLoggedIn = true;
-    currentUsername = user.username;
-    res.json({ success: true });
-});
 
-app.post('/api/logout', (req, res) => {
-    isAdminLoggedIn = false;
-    currentUsername = null;
-    res.json({ success: true });
-});
-
-// Đổi mật khẩu
-app.post('/api/change-password', async (req, res) => {
-    const { username, oldPassword, newPassword } = req.body;
-    const { data: user } = await supabase.from('app_users').select('*').eq('username', username).eq('password', oldPassword).single();
-    
-    if (!user) {
-res.json({ success: false, message: 'Mật khẩu cũ không đúng!' });
-    }
-
-    await supabase.from('app_users').update({ password: newPassword }).eq('username', username);
-    res.json({ success: true, message: 'Đổi mật khẩu thành công!' });
-});
-
-// Thêm / Sửa / Xóa tài khoản admin khác
-app.post('/api/users/save', async (req, res) => {
-    const { username, password } = req.body;
-    const { error } = await supabase.from('app_users').insert([{ username, password, role: 'admin' }]);
-    if (error) return res.json({ success: false, message: error.message });
-    res.json({ success: true });
-});
-
-app.post('/api/users/delete', async (req, res) => {
-    const { id } = req.body;
-    await supabase.from('app_users').delete().eq('id', id);
-    res.json({ success: true });
-});
 // --- API XUẤT KHO VÀ GIẢM TRỪ TỒN KHO ---
 app.post('/api/export-warehouse', async (req, res) => {
     const { quote_id, customer_name, address, phone, project_name, items } = req.body;
@@ -197,7 +200,7 @@ app.post('/api/export-warehouse', async (req, res) => {
     if (error) return res.status(500).json({ error: error.message });
 
     // 2. Thêm items & trừ tồn kho
-    for (const item of items) {
+    for (const item of (items || [])) {
         await supabase.from('export_items').insert([{
             export_id: ticket.id,
             product_id: item.product_id,
