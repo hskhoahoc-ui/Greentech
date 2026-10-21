@@ -64,7 +64,7 @@ app.get('/category/:id', async (req, res) => {
     }
 });
 
-// --- API XỬ LÝ ĐĂNG NHẬP / ĐĂNG XUẤT ---
+// --- API ĐĂNG NHẬP / ĐĂNG XUẤT ---
 app.post('/api/login', async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -86,18 +86,13 @@ app.post('/api/logout', (req, res) => {
     res.json({ success: true });
 });
 
-// --- API QUẢN LÝ DANH MỤC SẢN PHẨM ---
+// --- API DANH MỤC SẢN PHẨM ---
 app.post('/api/categories/save', async (req, res) => {
     if (!isAdminLoggedIn) return res.json({ success: false, message: 'Chưa đăng nhập quyền Admin!' });
     const { id, name, avatar_url } = req.body;
-    
-    let result;
-    if (id) {
-        result = await supabase.from('categories').update({ name, avatar_url }).eq('id', id);
-    } else {
-        result = await supabase.from('categories').insert([{ name, avatar_url }]);
-    }
-
+    let result = id 
+        ? await supabase.from('categories').update({ name, avatar_url }).eq('id', id)
+        : await supabase.from('categories').insert([{ name, avatar_url }]);
     if (result.error) return res.json({ success: false, message: result.error.message });
     res.json({ success: true });
 });
@@ -110,19 +105,49 @@ app.post('/api/categories/delete', async (req, res) => {
     res.json({ success: true });
 });
 
-// --- API LƯU DỮ LIỆU CÁC TAB KHÁC ---
-app.post('/api/services/save', async (req, res) => {
-    if (!isAdminLoggedIn) return res.json({ success: false, message: 'Chưa đăng nhập!' });
-    const { service_type, content, warranty_maintenance, price } = req.body;
-    const { error } = await supabase.from('services').insert([{ service_type, content, warranty_maintenance, price }]);
+// --- API SẢN PHẨM (THÊM / SỬA / XÓA) ---
+app.post('/api/products/save', async (req, res) => {
+    if (!isAdminLoggedIn) return res.json({ success: false, message: 'Chưa đăng nhập Admin!' });
+    const { id, category_id, name, description, quantity, cost_price, selling_price, image_url } = req.body;
+    let result = id
+        ? await supabase.from('products').update({ name, description, quantity, cost_price, selling_price, image_url }).eq('id', id)
+        : await supabase.from('products').insert([{ category_id, name, description, quantity, cost_price, selling_price, image_url }]);
+    if (result.error) return res.json({ success: false, message: result.error.message });
+    res.json({ success: true });
+});
+
+app.post('/api/products/delete', async (req, res) => {
+    if (!isAdminLoggedIn) return res.json({ success: false, message: 'Chưa đăng nhập Admin!' });
+    const { id } = req.body;
+    const { error } = await supabase.from('products').delete().eq('id', id);
     if (error) return res.json({ success: false, message: error.message });
     res.json({ success: true });
 });
 
+// --- API DỰ ÁN KHÁCH HÀNG (THÊM / SỬA / XÓA) ---
 app.post('/api/projects/save', async (req, res) => {
     if (!isAdminLoggedIn) return res.json({ success: false, message: 'Chưa đăng nhập!' });
-    const { customer_name, project_name, completion_date, warranty_months } = req.body;
-    const { error } = await supabase.from('project_customers').insert([{ customer_name, project_name, completion_date, warranty_months }]);
+    const { id, customer_name, project_name, completion_date, warranty_months } = req.body;
+    let result = id
+        ? await supabase.from('project_customers').update({ customer_name, project_name, completion_date, warranty_months }).eq('id', id)
+        : await supabase.from('project_customers').insert([{ customer_name, project_name, completion_date, warranty_months }]);
+    if (result.error) return res.json({ success: false, message: result.error.message });
+    res.json({ success: true });
+});
+
+app.post('/api/projects/delete', async (req, res) => {
+    if (!isAdminLoggedIn) return res.json({ success: false, message: 'Chưa đăng nhập!' });
+    const { id } = req.body;
+    const { error } = await supabase.from('project_customers').delete().eq('id', id);
+    if (error) return res.json({ success: false, message: error.message });
+    res.json({ success: true });
+});
+
+// --- API KHÁC (DỊCH VỤ, BÁO GIÁ, CHI PHÍ, XUẤT KHO) ---
+app.post('/api/services/save', async (req, res) => {
+    if (!isAdminLoggedIn) return res.json({ success: false, message: 'Chưa đăng nhập!' });
+    const { service_type, content, warranty_maintenance, price } = req.body;
+    const { error } = await supabase.from('services').insert([{ service_type, content, warranty_maintenance, price }]);
     if (error) return res.json({ success: false, message: error.message });
     res.json({ success: true });
 });
@@ -152,7 +177,6 @@ app.post('/api/export-warehouse', async (req, res) => {
     res.json({ success: true, ticket_code });
 });
 
-// Xuất Excel Doanh Thu & Chi Phí
 app.get('/api/export-revenue-excel', async (req, res) => {
     const workbook = new ExcelJS.Workbook();
     const sheetRevenue = workbook.addWorksheet('Doanh Thu');
