@@ -86,7 +86,31 @@ app.post('/api/logout', (req, res) => {
     res.json({ success: true });
 });
 
-// --- API LƯU DỮ LIỆU CHO CÁC TAB ---
+// --- API QUẢN LÝ DANH MỤC SẢN PHẨM ---
+app.post('/api/categories/save', async (req, res) => {
+    if (!isAdminLoggedIn) return res.json({ success: false, message: 'Chưa đăng nhập quyền Admin!' });
+    const { id, name, avatar_url } = req.body;
+    
+    let result;
+    if (id) {
+        result = await supabase.from('categories').update({ name, avatar_url }).eq('id', id);
+    } else {
+        result = await supabase.from('categories').insert([{ name, avatar_url }]);
+    }
+
+    if (result.error) return res.json({ success: false, message: result.error.message });
+    res.json({ success: true });
+});
+
+app.post('/api/categories/delete', async (req, res) => {
+    if (!isAdminLoggedIn) return res.json({ success: false, message: 'Chưa đăng nhập quyền Admin!' });
+    const { id } = req.body;
+    const { error } = await supabase.from('categories').delete().eq('id', id);
+    if (error) return res.json({ success: false, message: error.message });
+    res.json({ success: true });
+});
+
+// --- API LƯU DỮ LIỆU CÁC TAB KHÁC ---
 app.post('/api/services/save', async (req, res) => {
     if (!isAdminLoggedIn) return res.json({ success: false, message: 'Chưa đăng nhập!' });
     const { service_type, content, warranty_maintenance, price } = req.body;
