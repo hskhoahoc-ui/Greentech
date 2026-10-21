@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title><%= category.name || 'Danh Mục Sản Phẩm' %></title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+        .header-bar { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #004488; padding-bottom: 10px; margin-bottom: 20px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .card { border: 1px solid #ddd; border-radius: 8px; padding: 15px; text-align: center; background: #fafafa; }
+        .card img { max-width: 100%; height: 180px; object-fit: cover; border-radius: 5px; }
+        .price { color: #d9534f; font-weight: bold; font-size: 1.1em; margin: 8px 0; }
+        .cost-price { color: #6c757d; font-size: 0.9em; font-style: italic; }
+        .btn-back { display: inline-block; padding: 8px 15px; background: #004488; color: white; text-decoration: none; border-radius: 4px; }
+        .btn-add { padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-delete { padding: 5px 10px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 8px; }
+        
+        .modal { display: none; position: fixed; z-index: 10; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 25px; border-radius: 8px; width: 400px; }
+        .modal-content input, .modal-content textarea { width: 95%; padding: 8px; margin: 6px 0; border: 1px solid #ccc; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-bar">
+            <h2>Danh Mục: <%= category.name || 'Sản Phẩm' %></h2>
+            <div>
+                <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
+                    <button class="btn-add" onclick="openProductModal()">+ Thêm Sản Phẩm Mới</button>
+                <% } %>
+                <a href="/" class="btn-back">⬅ Quay Lại Trang Chủ</a>
+            </div>
+        </div>
+
+        <div class="grid-3">
+            <% if ((products || []).length === 0) { %>
+                <p>Chưa có sản phẩm nào trong danh mục này.</p>
+            <% } %>
+            <% (products || []).forEach(p => { %>
+                <div class="card">
+                    <img src="<%= p.image_url || 'https://via.placeholder.com/150' %>" alt="<%= p.name %>">
+                    <h4><%= p.name %></h4>
+                    <p><%= p.description %></p>
+                    <div class="price">Giá bán: <%= Number(p.selling_price || 0).toLocaleString('vi-VN') %> VNĐ</div>
+                    <div>Tồn kho: <%= p.quantity || 0 %></div>
+
+                    <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
+                        <div class="cost-price">Giá nhập: <%= Number(p.cost_price || 0).toLocaleString('vi-VN') %> VNĐ</div>
+                        <button class="btn-delete" onclick="deleteProduct('<%= p.id %>')">Xóa sản phẩm</button>
+                    <% } %>
+                </div>
+            <% }) %>
+        </div>
+    </div>
+
+    <!-- Modal Thêm Sản Phẩm -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <h3>Thêm Sản Phẩm Mới</h3>
+            <input type="text" id="pName" placeholder="Tên sản phẩm">
+            <textarea id="pDesc" placeholder="Mô tả"></textarea>
+            <input type="number" id="pQty" placeholder="Số lượng tồn kho">
+            <input type="number" id="pCost" placeholder="Giá nhập (GiaTriNhap)">
+            <input type="number" id="pSell" placeholder="Giá bán (GiaTriBan)">
+            <input type="text" id="pImg" placeholder="Link ảnh (image_url)">
+            <button onclick="saveProduct()" style="background:#28a745; color:white; border:none; padding:10px; width:100%;">Lưu Sản Phẩm</button>
+            <button onclick="closeProductModal()" style="background:#aaa; color:white; border:none; padding:10px; width:100%; margin-top:5px;">Hủy</button>
+        </div>
+    </div>
+
+    <script>
+        function openProductModal() { document.getElementById('productModal').style.display = 'flex'; }
+        function closeProductModal() { document.getElementById('productModal').style.display = 'none'; }
+
+        async function saveProduct() {
+            const data = {
+                category_id: '<%= category.id %>',
+                name: document.getElementById('pName').value,
+                description: document.getElementById('pDesc').value,
+                quantity: document.getElementById('pQty').value,
+                cost_price: document.getElementById('pCost').value,
+                selling_price: document.getElementById('pSell').value,
+                image_url: document.getElementById('pImg').value
+            };
+
+            const res = await fetch('/api/products/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            if (result.success) {
+                alert('Thêm sản phẩm thành công!');
+                window.location.reload();
+            } else {
+                alert('Lỗi: ' + result.message);
+            }
+        }
+
+        async function deleteProduct(id) {
+            if (!confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) return;
+            const res = await fetch('/api/products/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            });
+            const result = await res.json();
+            if (result.success) {
+                alert('Xóa sản phẩm thành công!');
+                window.location.reload();
+            } else {
+                alert('Lỗi: ' + result.message);
+            }
+        }
+    </script>
+</body>
+</html>
