@@ -9,16 +9,30 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
 
-// Middleware kiểm tra Admin (mô phỏng đơn giản)
-let isAdminLoggedIn = false;
-
-app.post('/api/login-admin', (req, res) => {
-    const { username, password } = req.body;
-    if (username === 'admin' && password === 'admin123') {
+// Middleware / Route xử lý đăng nhập Admin kết nối Supabase
+app.post('/api/login', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        
+        // Truy vấn kiểm tra thông tin trong bảng app_users của Supabase
+        const { data: users, error } = await supabase
+            .from('app_users')
+            .select('*')
+            .eq('username', username)
+            .eq('password', password);
+        
+        if (error || !users || users.length === 0) {
+            return res.json({ success: false, message: 'Sai tên đăng nhập hoặc mật khẩu!' });
+        }
+        
+        // Đăng nhập thành công, lưu trạng thái phiên
         isAdminLoggedIn = true;
-        res.json({ success: true });
-    } else {
-        res.json({ success: false, message: 'Sai thông tin đăng nhập' });
+        currentUsername = users[0].username;
+        
+        return res.json({ success: true, message: 'Đăng nhập thành công!' });
+    } catch (err) {
+        console.error('Lỗi đăng nhập:', err);
+        return res.json({ success: false, message: 'Lỗi hệ thống khi đăng nhập!' });
     }
 });
 
