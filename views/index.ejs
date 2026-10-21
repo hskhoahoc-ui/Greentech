@@ -2,45 +2,61 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CÔNG TY TNHH KỸ THUẬT TỰ ĐỘNG HOÁ XANH</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f6f9; }
-        header { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background: #004488; color: white; flex-wrap: wrap; gap: 15px; }
-        .company-info { display: flex; align-items: center; gap: 15px; }
-        .company-logo { height: 55px; width: 55px; object-fit: contain; background: white; border-radius: 6px; padding: 2px; }
-        .company-title { font-size: 1.15rem; margin: 0 0 4px 0; text-transform: uppercase; font-weight: bold; }
-        .company-sub { font-size: 0.85rem; margin: 0; opacity: 0.9; }
+        * { box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f6f9; color: #333; }
+        
+        /* Header Responsive */
+        header { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; background: #004488; color: white; flex-wrap: wrap; gap: 12px; }
+        .company-info { display: flex; align-items: center; gap: 12px; }
+        .company-logo { height: 50px; width: 50px; object-fit: contain; background: white; border-radius: 6px; padding: 2px; }
+        .company-title { font-size: 1.05rem; margin: 0 0 3px 0; text-transform: uppercase; font-weight: bold; line-height: 1.2; }
+        .company-sub { font-size: 0.8rem; margin: 0; opacity: 0.95; line-height: 1.3; }
 
-        nav.menu { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
-        nav.menu a { color: white; text-decoration: none; font-size: 0.8rem; font-weight: bold; cursor: pointer; padding: 6px 10px; border-radius: 4px; background: rgba(255,255,255,0.1); }
+        /* Navigation Responsive */
+        nav.menu { display: flex; align-items: center; gap: 6px; overflow-x: auto; max-width: 100%; padding-bottom: 4px; }
+        nav.menu a { color: white; text-decoration: none; font-size: 0.85rem; font-weight: bold; cursor: pointer; padding: 8px 12px; border-radius: 4px; background: rgba(255,255,255,0.15); whitespace: nowrap; }
         nav.menu a:hover, nav.menu a.active-tab { background: #002244; color: #ffcc00; }
         
-        .container { max-width: 1200px; margin: 25px auto; padding: 0 20px; }
-        .tab-content { display: none; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        /* Layout Mobile Friendly */
+        .container { max-width: 1200px; margin: 15px auto; padding: 0 12px; }
+        .tab-content { display: none; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .tab-content.active { display: block; }
 
-        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 20px; }
-        .card { border: 1px solid #ccc; border-radius: 8px; padding: 15px; text-align: center; background: #f9f9f9; }
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-top: 15px; }
+        .card { border: 1px solid #ccc; border-radius: 8px; padding: 12px; text-align: center; background: #f9f9f9; }
         .card img { max-width: 100%; height: 160px; object-fit: cover; border-radius: 5px; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        table, th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 0.95rem; }
+        /* Responsive Table */
+        .table-responsive { width: 100%; overflow-x: auto; margin-top: 15px; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        table, th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 0.9rem; }
         th { background: #f2f2f2; }
 
         .status-active { color: green; font-weight: bold; }
         .status-expired { color: red; font-weight: bold; }
-        .alert-popup { background: #ffcccc; color: #cc0000; padding: 10px; border-radius: 5px; margin-bottom: 15px; }
+        .alert-popup { background: #ffcccc; color: #cc0000; padding: 12px; border-radius: 5px; margin-bottom: 15px; font-size: 0.9rem; }
         
-        .form-box { background: #f8f9fa; padding: 15px; border-radius: 6px; border: 1px solid #ddd; margin-bottom: 20px; }
-        .form-box input, .form-box select { padding: 8px; margin: 5px 5px 5px 0; width: 220px; border: 1px solid #ccc; border-radius: 4px; }
-        .form-box button { padding: 8px 15px; background: #004488; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        /* Form inputs to rõ dễ bấm trên điện thoại */
+        .form-box { background: #f8f9fa; padding: 15px; border-radius: 6px; border: 1px solid #ddd; margin-bottom: 15px; }
+        .form-box input, .form-box select { padding: 10px; margin: 5px 0; width: 100%; border: 1px solid #ccc; border-radius: 4px; font-size: 0.95rem; }
+        .form-box button { padding: 10px 18px; background: #004488; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.95rem; font-weight: bold; margin-top: 5px; width: 100%; }
 
-        .modal { display: none; position: fixed; z-index: 10; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
-        .modal-content { background: white; padding: 30px; border-radius: 8px; width: 400px; text-align: center; }
-        .modal-content input { width: 90%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 4px; }
-        .modal-content button { padding: 10px 20px; background: #004488; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 5px; }
+        .modal { display: none; position fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; padding: 10px; }
+        .modal-content { background: white; padding: 20px; border-radius: 8px; width: 100%; max-width: 420px; text-align: center; }
+        .modal-content input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 4px; font-size: 0.95rem; }
+        .modal-content button { padding: 10px 18px; background: #004488; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 5px; width: 100%; font-size: 0.95rem; }
 
-        /* Định dạng in khổ A4 */
+        .btn-edit { background: #ffc107; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-delete { background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+
+        @media (min-width: 768px) {
+            .form-box button { width: auto; }
+            .modal-content button { width: auto; }
+        }
+
         @media print {
             body * { visibility: hidden; }
             #tab-quotes, #tab-quotes * { visibility: visible; }
@@ -53,12 +69,11 @@
 
     <header>
         <div class="company-info">
-            <!-- Vị trí Logo: Bạn có thể để ảnh tại public/images/logo.png hoặc dán URL ảnh vào src -->
-            <img src="/images/logo.png" onerror="this.src='https://via.placeholder.com/60?text=LOGO'" alt="Logo" class="company-logo">
+            <img src="/images/logo.png" onerror="this.src='https://via.placeholder.com/50?text=LOGO'" alt="Logo" class="company-logo">
             <div>
                 <h2 class="company-title">CÔNG TY TNHH KỸ THUẬT TỰ ĐỘNG HOÁ XANH</h2>
                 <p class="company-sub">
-                    📍 Địa chỉ: 263/16, ấp Hoà Đông, xã Phú Hoà, tỉnh An Giang &nbsp;|&nbsp; ☎️ SĐT: 0350.274.913
+                    📍 Địa chỉ: 263/16, ấp Hoà Đông, xã Phú Hoà, An Giang<br>☎️ SĐT: 0350.274.913
                 </p>
             </div>
         </div>
@@ -94,8 +109,8 @@
 
         <!-- TAB 1: SẢN PHẨM -->
         <div id="tab-products" class="tab-content active">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h3>Danh Mục Sản Phẩm</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                <h3 style="margin:0;">Danh Mục Sản Phẩm</h3>
                 <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
                     <button onclick="openCategoryModal()" style="background: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">+ Thêm Danh Mục Mới</button>
                 <% } %>
@@ -109,8 +124,8 @@
                         </div>
                         <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
                             <div style="margin-top: 10px; display: flex; gap: 5px; justify-content: center;">
-                                <button onclick="editCategory('<%= cat.id %>', '<%= cat.name %>', '<%= cat.avatar_url %>')" style="background: #ffc107; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">Sửa</button>
-                                <button onclick="deleteCategory('<%= cat.id %>')" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">Xóa</button>
+                                <button class="btn-edit" onclick="editCategory('<%= cat.id %>', '<%= cat.name %>', '<%= cat.avatar_url %>')">Sửa</button>
+                                <button class="btn-delete" onclick="deleteCategory('<%= cat.id %>')">Xóa</button>
                             </div>
                         <% } %>
                     </div>
@@ -131,47 +146,59 @@
                     <button onclick="addService()">Lưu Dịch Vụ</button>
                 </div>
             <% } %>
-            <table>
-                <thead>
-                    <tr><th>Loại Dịch Vụ</th><th>Nội Dung</th><th>Bảo Hành</th><th>Giá</th></tr>
-                </thead>
-                <tbody>
-                    <% (services || []).forEach(s => { %>
-                        <tr><td><%= s.service_type %></td><td><%= s.content %></td><td><%= s.warranty_maintenance %></td><td><%= Number(s.price || 0).toLocaleString('vi-VN') %> VNĐ</td></tr>
-                    <% }) %>
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr><th>Loại Dịch Vụ</th><th>Nội Dung</th><th>Bảo Hành</th><th>Giá</th></tr>
+                    </thead>
+                    <tbody>
+                        <% (services || []).forEach(s => { %>
+                            <tr><td><%= s.service_type %></td><td><%= s.content %></td><td><%= s.warranty_maintenance %></td><td><%= Number(s.price || 0).toLocaleString('vi-VN') %> VNĐ</td></tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
-        <!-- TAB 3: DỰ ÁN -->
+        <!-- TAB 3: DỰ ÁN KHÁCH HÀNG (Hỗ trợ Thêm / Sửa / Xóa) -->
         <div id="tab-projects" class="tab-content">
             <h3>Quản Lý Khách Hàng Dự Án & Bảo Hành</h3>
             <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
                 <div class="form-box">
-                    <h4>➕ Thêm Dự Án Mới</h4>
+                    <h4 id="projFormTitle">➕ Thêm Dự Án Mới</h4>
+                    <input type="hidden" id="pId">
                     <input type="text" id="pCustName" placeholder="Tên Khách Hàng">
                     <input type="text" id="pProjName" placeholder="Tên Dự Án">
                     <input type="date" id="pCompDate">
                     <input type="number" id="pWarrantyMos" placeholder="Số tháng BH">
-                    <button onclick="addProject()">Lưu Dự Án</button>
+                    <button onclick="saveProject()" style="background:#28a745;">Lưu Dự Án</button>
+                    <button id="btnCancelProj" onclick="resetProjectForm()" style="background:#aaa; display:none; margin-left:5px;">Hủy Sửa</button>
                 </div>
             <% } %>
-            <table>
-                <thead>
-                    <tr><th>Tên Khách Hàng</th><th>Tên Dự Án</th><th>Ngày Hoàn Công</th><th>Hạn Bảo Hành</th><th>Trạng Thái</th></tr>
-                </thead>
-                <tbody>
-                    <% safeProjects.forEach(p => { %>
-                        <tr>
-                            <td><%= p.customer_name %></td>
-                            <td><%= p.project_name %></td>
-                            <td><%= p.completion_date %></td>
-                            <td class="<%= p.isExpired ? 'status-expired' : 'status-active' %>"><%= p.expiryDate %></td>
-                            <td><%= p.isExpired ? 'Đã Hết Bảo Hành' : 'Còn Bảo Hành' %></td>
-                        </tr>
-                    <% }) %>
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr><th>Tên Khách Hàng</th><th>Tên Dự Án</th><th>Ngày Hoàn Công</th><th>Hạn Bảo Hành</th><th>Trạng Thái</th><% if (typeof isAdmin !== 'undefined' && isAdmin) { %><th>Thao Tác</th><% } %></tr>
+                    </thead>
+                    <tbody>
+                        <% safeProjects.forEach(p => { %>
+                            <tr>
+                                <td><%= p.customer_name %></td>
+                                <td><%= p.project_name %></td>
+                                <td><%= p.completion_date %></td>
+                                <td class="<%= p.isExpired ? 'status-expired' : 'status-active' %>"><%= p.expiryDate %></td>
+                                <td><%= p.isExpired ? 'Đã Hết Bảo Hành' : 'Còn Bảo Hành' %></td>
+                                <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
+                                    <td>
+                                        <button class="btn-edit" onclick="editProject('<%= p.id %>', '<%= p.customer_name %>', '<%= p.project_name %>', '<%= p.completion_date %>', '<%= p.warranty_months %>')">Sửa</button>
+                                        <button class="btn-delete" onclick="deleteProject('<%= p.id %>')">Xóa</button>
+                                    </td>
+                                <% } %>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
@@ -180,51 +207,49 @@
                 <h3>Lập & In Báo Giá (Khổ A4)</h3>
                 <div class="form-box">
                     <h4>➕ Tạo Báo Giá Mới</h4>
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 10px;">
-                        <input type="text" id="qCode" placeholder="Mã Báo Giá (VD: BG-01)" style="width: 100%;">
-                        <input type="text" id="qCust" placeholder="Tên Khách Hàng" style="width: 100%;">
-                        <input type="text" id="qProj" placeholder="Tên Dự Án" style="width: 100%;">
-                        <input type="text" id="qAddress" placeholder="Địa chỉ công trình" style="width: 100%;">
-                    </div>
+                    <input type="text" id="qCode" placeholder="Mã Báo Giá (VD: BG-01)">
+                    <input type="text" id="qCust" placeholder="Tên Khách Hàng">
+                    <input type="text" id="qProj" placeholder="Tên Dự Án">
+                    <input type="text" id="qAddress" placeholder="Địa chỉ công trình">
 
-                    <h5>Chọn Thiết Bị / Vật Tư Từ Kho:</h5>
-                    <select id="selectProduct" style="width: 100%; padding: 8px; margin-bottom: 10px;">
+                    <h5 style="margin:10px 0 5px 0;">Chọn Thiết Bị / Vật Tư Từ Kho:</h5>
+                    <select id="selectProduct">
                         <option value="">-- Chọn sản phẩm --</option>
                         <% (products || []).forEach(p => { %>
                             <option value="<%= p.id %>" data-name="<%= p.name %>" data-price="<%= p.selling_price %>"><%= p.name %> (Tồn: <%= p.quantity %> - Giá: <%= Number(p.selling_price || 0).toLocaleString('vi-VN') %>đ)</option>
                         <% }) %>
                     </select>
-                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                        <input type="number" id="itemQty" placeholder="Số lượng" style="width: 150px;" value="1">
-                        <button type="button" onclick="addItemToQuote()" style="background: #17a2b8; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">Thêm vào báo giá</button>
+                    <input type="number" id="itemQty" placeholder="Số lượng" value="1">
+                    <button type="button" onclick="addItemToQuote()" style="background: #17a2b8; color: white;">Thêm vào báo giá</button>
+
+                    <div class="table-responsive">
+                        <table id="quoteItemsTable" style="margin-top: 10px;">
+                            <thead>
+                                <tr><th>Tên Thiết Bị / Vật Tư</th><th>Số Lượng</th><th>Đơn Giá</th><th>Thành Tiền</th><th>Thao Tác</th></tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
                     </div>
 
-                    <table id="quoteItemsTable" style="margin-bottom: 15px;">
-                        <thead>
-                            <tr><th>Tên Thiết Bị / Vật Tư</th><th>Số Lượng</th><th>Đơn Giá</th><th>Thành Tiền</th><th>Thao Tác</th></tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px;">
-                        <input type="number" id="surveyCost" placeholder="Chi phí khảo sát (VNĐ)" style="width: 100%;" oninput="calculateQuoteTotal()">
-                        <input type="number" id="constructionCost" placeholder="Chi phí thi công (VNĐ)" style="width: 100%;" oninput="calculateQuoteTotal()">
-                    </div>
+                    <input type="number" id="surveyCost" placeholder="Chi phí khảo sát (VNĐ)" oninput="calculateQuoteTotal()">
+                    <input type="number" id="constructionCost" placeholder="Chi phí thi công (VNĐ)" oninput="calculateQuoteTotal()">
                     <h4>Tổng cộng: <span id="quoteTotalDisplay" style="color: red;">0</span> VNĐ</h4>
                     
-                    <button onclick="saveAndPrintQuote()" style="background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">💾 Lưu & In Báo Giá (A4)</button>
+                    <button onclick="saveAndPrintQuote()" style="background: #28a745; color: white;">💾 Lưu & In Báo Giá (A4)</button>
                 </div>
 
-                <table>
-                    <thead>
-                        <tr><th>Mã Báo Giá</th><th>Khách Hàng</th><th>Dự Án</th><th>Tổng Tiền</th><th>Ngày Tạo</th></tr>
-                    </thead>
-                    <tbody>
-                        <% (quotes || []).forEach(q => { %>
-                            <tr><td><%= q.quote_code %></td><td><%= q.customer_name %></td><td><%= q.project_name %></td><td><%= Number(q.total_amount || 0).toLocaleString('vi-VN') %> VNĐ</td><td><%= new Date(q.created_at).toLocaleDateString('vi-VN') %></td></tr>
-                        <% }) %>
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr><th>Mã Báo Giá</th><th>Khách Hàng</th><th>Dự Án</th><th>Tổng Tiền</th><th>Ngày Tạo</th></tr>
+                        </thead>
+                        <tbody>
+                            <% (quotes || []).forEach(q => { %>
+                                <tr><td><%= q.quote_code %></td><td><%= q.customer_name %></td><td><%= q.project_name %></td><td><%= Number(q.total_amount || 0).toLocaleString('vi-VN') %> VNĐ</td><td><%= new Date(q.created_at).toLocaleDateString('vi-VN') %></td></tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- TAB 5: XUẤT KHO -->
@@ -232,71 +257,73 @@
                 <h3>Quản Lý Phiếu Xuất Kho</h3>
                 <div class="form-box">
                     <h4>➕ Lập Phiếu Xuất Kho</h4>
-                    <div style="margin-bottom: 10px;">
-                        <label><strong>Chọn từ Mã Báo Giá (Tự động điền):</strong></label><br>
-                        <select id="selectQuoteCode" onchange="fillDataFromQuote()" style="width: 100%; padding: 8px; margin-top: 5px;">
-                            <option value="">-- Chọn mã báo giá (Hoặc tự nhập bên dưới) --</option>
-                            <% (quotes || []).forEach(q => { %>
-                                <option value="<%= q.quote_code %>" data-cust="<%= q.customer_name %>" data-proj="<%= q.project_name %>" data-addr="<%= q.address %>">Mã: <%= q.quote_code %> - Khách: <%= q.customer_name %> - Dự án: <%= q.project_name %></option>
-                            <% }) %>
-                        </select>
-                    </div>
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 10px;">
-                        <input type="text" id="wCust" placeholder="Tên Khách Hàng" style="width: 100%;">
-                        <input type="text" id="wProj" placeholder="Tên Dự Án" style="width: 100%;">
-                        <input type="text" id="wAddress" placeholder="Địa chỉ giao hàng" style="width: 100%;">
-                        <input type="text" id="wPhone" placeholder="Số điện thoại" style="width: 100%;">
-                    </div>
-                    <button onclick="createWarehouseTicket()" style="background: #004488; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">📦 Xuất Kho & In Phiếu</button>
-                </div>
-                <table>
-                    <thead>
-                        <tr><th>Mã Phiếu Xuất</th><th>Khách Hàng</th><th>Dự Án</th><th>Địa Chỉ</th><th>Ngày Xuất</th></tr>
-                    </thead>
-                    <tbody>
-                        <% (exportTickets || []).forEach(t => { %>
-                            <tr><td><%= t.ticket_code %></td><td><%= t.customer_name %></td><td><%= t.project_name %></td><td><%= t.address %></td><td><%= new Date(t.created_at).toLocaleDateString('vi-VN') %></td></tr>
+                    <label><strong>Chọn từ Mã Báo Giá:</strong></label>
+                    <select id="selectQuoteCode" onchange="fillDataFromQuote()">
+                        <option value="">-- Chọn mã báo giá --</option>
+                        <% (quotes || []).forEach(q => { %>
+                            <option value="<%= q.quote_code %>" data-cust="<%= q.customer_name %>" data-proj="<%= q.project_name %>" data-addr="<%= q.address %>">Mã: <%= q.quote_code %> - Khách: <%= q.customer_name %> - Dự án: <%= q.project_name %></option>
                         <% }) %>
-                    </tbody>
-                </table>
+                    </select>
+                    <input type="text" id="wCust" placeholder="Tên Khách Hàng">
+                    <input type="text" id="wProj" placeholder="Tên Dự Án">
+                    <input type="text" id="wAddress" placeholder="Địa chỉ giao hàng">
+                    <input type="text" id="wPhone" placeholder="Số điện thoại">
+                    <button onclick="createWarehouseTicket()" style="background: #004488;">📦 Xuất Kho & In Phiếu</button>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr><th>Mã Phiếu Xuất</th><th>Khách Hàng</th><th>Dự Án</th><th>Địa Chỉ</th><th>Ngày Xuất</th></tr>
+                        </thead>
+                        <tbody>
+                            <% (exportTickets || []).forEach(t => { %>
+                                <tr><td><%= t.ticket_code %></td><td><%= t.customer_name %></td><td><%= t.project_name %></td><td><%= t.address %></td><td><%= new Date(t.created_at).toLocaleDateString('vi-VN') %></td></tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- TAB 6: TỒN KHO -->
             <div id="tab-inventory" class="tab-content">
                 <h3>Kiểm Tra Tồn Kho Sản Phẩm / Vật Tư</h3>
-                <table>
-                    <thead>
-                        <tr><th>Tên Sản Phẩm</th><th>Mô Tả</th><th>Số Lượng Tồn</th><th>Giá Bán</th></tr>
-                    </thead>
-                    <tbody>
-                        <% (products || []).forEach(prod => { %>
-                            <tr>
-                                <td><%= prod.name %></td>
-                                <td><%= prod.description %></td>
-                                <td><strong style="color: <%= prod.quantity > 5 ? 'green' : 'red' %>;"><%= prod.quantity || 0 %></strong></td>
-                                <td><%= Number(prod.selling_price || 0).toLocaleString('vi-VN') %> VNĐ</td>
-                            </tr>
-                        <% }) %>
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr><th>Tên Sản Phẩm</th><th>Mô Tả</th><th>Số Lượng Tồn</th><th>Giá Bán</th></tr>
+                        </thead>
+                        <tbody>
+                            <% (products || []).forEach(prod => { %>
+                                <tr>
+                                    <td><%= prod.name %></td>
+                                    <td><%= prod.description %></td>
+                                    <td><strong style="color: <%= prod.quantity > 5 ? 'green' : 'red' %>;"><%= prod.quantity || 0 %></strong></td>
+                                    <td><%= Number(prod.selling_price || 0).toLocaleString('vi-VN') %> VNĐ</td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- TAB 7: DOANH THU -->
             <div id="tab-revenue" class="tab-content">
                 <h3>Quản Lý Doanh Thu & Báo Cáo</h3>
-                <div style="margin-bottom: 20px;">
-                    <a href="/api/export-revenue-excel" style="background:#17a2b8; color:white; padding:10px 20px; text-decoration:none; display:inline-block; border-radius:4px; font-weight:bold;">📥 Xuất Báo Cáo Doanh Thu & Chi Phí (Excel)</a>
+                <div style="margin-bottom: 15px;">
+                    <a href="/api/export-revenue-excel" style="background:#17a2b8; color:white; padding:10px 18px; text-decoration:none; display:inline-block; border-radius:4px; font-weight:bold;">📥 Xuất Báo Cáo Doanh Thu & Chi Phí (Excel)</a>
                 </div>
-                <table>
-                    <thead>
-                        <tr><th>Mã Báo Giá</th><th>Khách Hàng</th><th>Dự Án</th><th>Doanh Thu</th></tr>
-                    </thead>
-                    <tbody>
-                        <% (quotes || []).forEach(q => { %>
-                            <tr><td><%= q.quote_code %></td><td><%= q.customer_name %></td><td><%= q.project_name %></td><td><%= Number(q.total_amount || 0).toLocaleString('vi-VN') %> VNĐ</td></tr>
-                        <% }) %>
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr><th>Mã Báo Giá</th><th>Khách Hàng</th><th>Dự Án</th><th>Doanh Thu</th></tr>
+                        </thead>
+                        <tbody>
+                            <% (quotes || []).forEach(q => { %>
+                                <tr><td><%= q.quote_code %></td><td><%= q.customer_name %></td><td><%= q.project_name %></td><td><%= Number(q.total_amount || 0).toLocaleString('vi-VN') %> VNĐ</td></tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- TAB 8: CHI PHÍ -->
@@ -310,16 +337,18 @@
                     <input type="date" id="expDate">
                     <button onclick="addExpense()">Lưu Chi Phí</button>
                 </div>
-                <table>
-                    <thead>
-                        <tr><th>Loại Chi Phí</th><th>Mô Tả</th><th>Số Tiền</th><th>Ngày Nhập</th></tr>
-                    </thead>
-                    <tbody>
-                        <% (expenses || []).forEach(e => { %>
-                            <tr><td><%= e.expense_type %></td><td><%= e.description %></td><td><%= Number(e.amount || 0).toLocaleString('vi-VN') %> VNĐ</td><td><%= e.expense_date %></td></tr>
-                        <% }) %>
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr><th>Loại Chi Phí</th><th>Mô Tả</th><th>Số Tiền</th><th>Ngày Nhập</th></tr>
+                        </thead>
+                        <tbody>
+                            <% (expenses || []).forEach(e => { %>
+                                <tr><td><%= e.expense_type %></td><td><%= e.description %></td><td><%= Number(e.amount || 0).toLocaleString('vi-VN') %> VNĐ</td><td><%= e.expense_date %></td></tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         <% } %>
 
@@ -332,7 +361,7 @@
             <input type="text" id="username" placeholder="Tài khoản"><br>
             <input type="password" id="password" placeholder="Mật khẩu"><br>
             <button onclick="submitLogin()">Đăng Nhập</button>
-            <button onclick="closeLoginModal()" style="background: #aaa; margin-left: 10px;">Đóng</button>
+            <button onclick="closeLoginModal()" style="background: #aaa;">Đóng</button>
         </div>
     </div>
 
@@ -342,19 +371,18 @@
             <input type="password" id="oldPassword" placeholder="Mật khẩu cũ"><br>
             <input type="password" id="newPassword" placeholder="Mật khẩu mới"><br>
             <button onclick="changePassword()">Cập Nhật</button>
-            <button onclick="closeAdminPanel()" style="background: #6c757d; margin-top:5px;">Đóng</button>
+            <button onclick="closeAdminPanel()" style="background: #6c757d;">Đóng</button>
         </div>
     </div>
 
-    <!-- Modal Thêm/Sửa Danh Mục Sản Phẩm -->
     <div id="categoryModal" class="modal">
         <div class="modal-content">
             <h3 id="catModalTitle">Thêm Danh Mục Mới</h3>
             <input type="hidden" id="catId">
-            <input type="text" id="catName" placeholder="Tên danh mục (VD: Tủ điện)"><br>
-            <input type="text" id="catAvatar" placeholder="Link ảnh đại diện (avatar_url)"><br>
+            <input type="text" id="catName" placeholder="Tên danh mục"><br>
+            <input type="text" id="catAvatar" placeholder="Link ảnh đại diện"><br>
             <button onclick="saveCategory()" style="background: #28a745;">Lưu Danh Mục</button>
-            <button onclick="closeCategoryModal()" style="background: #aaa; margin-left: 10px;">Đóng</button>
+            <button onclick="closeCategoryModal()" style="background: #aaa;">Đóng</button>
         </div>
     </div>
 
@@ -389,9 +417,7 @@
             document.getElementById('categoryModal').style.display = 'flex';
         }
 
-        function closeCategoryModal() {
-            document.getElementById('categoryModal').style.display = 'none';
-        }
+        function closeCategoryModal() { document.getElementById('categoryModal').style.display = 'none'; }
 
         async function saveCategory() {
             const id = document.getElementById('catId').value;
@@ -419,6 +445,56 @@
             });
             const data = await res.json();
             if (data.success) { alert('Xóa danh mục thành công!'); window.location.reload(); }
+            else { alert('Lỗi: ' + data.message); }
+        }
+
+        // Quản lý Dự Án Khách Hàng (Thêm / Sửa / Xóa)
+        function editProject(id, custName, projName, compDate, warrantyMos) {
+            document.getElementById('projFormTitle').innerText = '✏️ Chỉnh Sửa Dự Án';
+            document.getElementById('pId').value = id;
+            document.getElementById('pCustName').value = custName;
+            document.getElementById('pProjName').value = projName;
+            document.getElementById('pCompDate').value = compDate;
+            document.getElementById('pWarrantyMos').value = warrantyMos;
+            document.getElementById('btnCancelProj').style.display = 'inline-block';
+        }
+
+        function resetProjectForm() {
+            document.getElementById('projFormTitle').innerText = '➕ Thêm Dự Án Mới';
+            document.getElementById('pId').value = '';
+            document.getElementById('pCustName').value = '';
+            document.getElementById('pProjName').value = '';
+            document.getElementById('pCompDate').value = '';
+            document.getElementById('pWarrantyMos').value = '';
+            document.getElementById('btnCancelProj').style.display = 'none';
+        }
+
+        async function saveProject() {
+            const id = document.getElementById('pId').value;
+            const customer_name = document.getElementById('pCustName').value;
+            const project_name = document.getElementById('pProjName').value;
+            const completion_date = document.getElementById('pCompDate').value;
+            const warranty_months = document.getElementById('pWarrantyMos').value;
+
+            const res = await fetch('/api/projects/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id || null, customer_name, project_name, completion_date, warranty_months })
+            });
+            const data = await res.json();
+            if (data.success) { alert('Lưu dự án thành công!'); window.location.reload(); }
+            else { alert('Lỗi: ' + data.message); }
+        }
+
+        async function deleteProject(id) {
+            if (!confirm('Bạn có chắc chắn muốn xóa dự án này?')) return;
+            const res = await fetch('/api/projects/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            });
+            const data = await res.json();
+            if (data.success) { alert('Xóa dự án thành công!'); window.location.reload(); }
             else { alert('Lỗi: ' + data.message); }
         }
 
@@ -546,15 +622,6 @@
             const res = await fetch('/api/services/save', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ service_type: document.getElementById('sType').value, content: document.getElementById('sContent').value, warranty_maintenance: document.getElementById('sWarranty').value, price: document.getElementById('sPrice').value })
-            });
-            const data = await res.json();
-            if (data.success) { alert('Thành công!'); window.location.reload(); } else { alert(data.message); }
-        }
-
-        async function addProject() {
-            const res = await fetch('/api/projects/save', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ customer_name: document.getElementById('pCustName').value, project_name: document.getElementById('pProjName').value, completion_date: document.getElementById('pCompDate').value, warranty_months: document.getElementById('pWarrantyMos').value })
             });
             const data = await res.json();
             if (data.success) { alert('Thành công!'); window.location.reload(); } else { alert(data.message); }
