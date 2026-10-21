@@ -93,7 +93,17 @@
 
         <!-- TAB 2: DỊCH VỤ -->
         <div id="tab-services" class="tab-content">
-            <h3>Dịch Vụ Nổi Bật</h3>
+            <h3>Quản Lý Dịch Vụ Nổi Bật</h3>
+            <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
+                <div class="form-box">
+                    <h4>➕ Thêm Dịch Vụ Mới</h4>
+                    <input type="text" id="sType" placeholder="Loại Dịch Vụ">
+                    <input type="text" id="sContent" placeholder="Nội Dung">
+                    <input type="text" id="sWarranty" placeholder="Bảo Hành / Bảo Dưỡng">
+                    <input type="number" id="sPrice" placeholder="Giá (VNĐ)">
+                    <button onclick="addService()">Lưu Dịch Vụ</button>
+                </div>
+            <% } %>
             <table>
                 <thead>
                     <tr>
@@ -118,7 +128,17 @@
 
         <!-- TAB 3: KHÁCH HÀNG DỰ ÁN -->
         <div id="tab-projects" class="tab-content">
-            <h3>Danh Sách Khách Hàng Dự Án</h3>
+            <h3>Quản Lý Khách Hàng Dự Án & Bảo Hành</h3>
+            <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
+                <div class="form-box">
+                    <h4>➕ Thêm Dự Án Khách Hàng Mới</h4>
+                    <input type="text" id="pCustName" placeholder="Tên Khách Hàng">
+                    <input type="text" id="pProjName" placeholder="Tên Dự Án">
+                    <input type="date" id="pCompDate" placeholder="Ngày Hoàn Công">
+                    <input type="number" id="pWarrantyMos" placeholder="Số tháng bảo hành">
+                    <button onclick="addProject()">Lưu Dự Án</button>
+                </div>
+            <% } %>
             <table>
                 <thead>
                     <tr>
@@ -152,7 +172,16 @@
         <!-- TAB 4: BÁO GIÁ & XUẤT KHO (Dành cho Admin) -->
         <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
             <div id="tab-quotes" class="tab-content">
-                <h3>Quản Lý Báo Giá & Xuất Kho</h3>
+                <h3>Tạo Báo Giá & Xuất Kho</h3>
+                <div class="form-box">
+                    <h4>➕ Lập Phiếu Báo Giá Mới</h4>
+                    <input type="text" id="qCode" placeholder="Mã Báo Giá (VD: Q-001)">
+                    <input type="text" id="qCust" placeholder="Tên Khách Hàng">
+                    <input type="text" id="qProj" placeholder="Tên Dự Án">
+                    <input type="text" id="qAddress" placeholder="Địa chỉ công trình">
+                    <input type="number" id="qAmount" placeholder="Tổng tiền (VNĐ)">
+                    <button onclick="addQuote()">Tạo Báo Giá</button>
+                </div>
                 <table>
                     <thead>
                         <tr>
@@ -180,17 +209,14 @@
             <!-- TAB 5: CHI PHÍ & DOANH THU (Dành cho Admin) -->
             <div id="tab-expenses" class="tab-content">
                 <h3>Quản Lý Chi Phí & Doanh Thu</h3>
-                
-                <!-- Form nhập liệu chi phí trực tiếp -->
                 <div class="form-box">
                     <h4>➕ Thêm Khoản Chi Phí Mới</h4>
-                    <input type="text" id="expType" placeholder="Loại chi phí (VD: Vật tư, Vận chuyển)">
+                    <input type="text" id="expType" placeholder="Loại chi phí (VD: Vật tư)">
                     <input type="text" id="expDesc" placeholder="Mô tả chi tiết">
                     <input type="number" id="expAmount" placeholder="Số tiền (VNĐ)">
                     <input type="date" id="expDate">
                     <button onclick="addExpense()">Lưu Chi Phí</button>
                 </div>
-
                 <table>
                     <thead>
                         <tr>
@@ -314,6 +340,55 @@
             } else {
                 alert('Lỗi: ' + data.message);
             }
+        }
+
+        async function addService() {
+            const service_type = document.getElementById('sType').value;
+            const content = document.getElementById('sContent').value;
+            const warranty_maintenance = document.getElementById('sWarranty').value;
+            const price = document.getElementById('sPrice').value;
+
+            const res = await fetch('/api/services/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ service_type, content, warranty_maintenance, price })
+            });
+            const data = await res.json();
+            if (data.success) { alert('Thêm dịch vụ thành công!'); window.location.reload(); }
+            else { alert('Lỗi: ' + data.message); }
+        }
+
+        async function addProject() {
+            const customer_name = document.getElementById('pCustName').value;
+            const project_name = document.getElementById('pProjName').value;
+            const completion_date = document.getElementById('pCompDate').value;
+            const warranty_months = document.getElementById('pWarrantyMos').value;
+
+            const res = await fetch('/api/projects/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ customer_name, project_name, completion_date, warranty_months })
+            });
+            const data = await res.json();
+            if (data.success) { alert('Thêm dự án thành công!'); window.location.reload(); }
+            else { alert('Lỗi: ' + data.message); }
+        }
+
+        async function addQuote() {
+            const quote_code = document.getElementById('qCode').value;
+            const customer_name = document.getElementById('qCust').value;
+            const project_name = document.getElementById('qProj').value;
+            const address = document.getElementById('qAddress').value;
+            const total_amount = document.getElementById('qAmount').value;
+
+            const res = await fetch('/api/quotes/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ quote_code, customer_name, project_name, address, total_amount })
+            });
+            const data = await res.json();
+            if (data.success) { alert('Tạo báo giá thành công!'); window.location.reload(); }
+            else { alert('Lỗi: ' + data.message); }
         }
 
         async function addExpense() {
