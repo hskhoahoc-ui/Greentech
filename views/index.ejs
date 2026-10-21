@@ -5,11 +5,13 @@
     <title>Công ty Thiết Bị Điện & Năng Lượng</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f6f9; }
-        header { display: flex; align-items: center; justify-content: space-between; padding: 15px 30px; background: #004488; color: white; }
-        nav.menu a { color: white; text-decoration: none; margin: 0 10px; font-weight: bold; cursor: pointer; padding: 6px 10px; border-radius: 4px; }
+        header { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background: #004488; color: white; flex-wrap: wrap; }
+        header h2 { font-size: 1.2rem; margin: 0; }
+        nav.menu { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        nav.menu a { color: white; text-decoration: none; font-size: 0.9rem; font-weight: bold; cursor: pointer; padding: 6px 10px; border-radius: 4px; background: rgba(255,255,255,0.1); }
         nav.menu a:hover, nav.menu a.active-tab { background: #002244; color: #ffcc00; }
-        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
         
+        .container { max-width: 1200px; margin: 25px auto; padding: 0 20px; }
         .tab-content { display: none; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .tab-content.active { display: block; }
 
@@ -18,35 +20,39 @@
         .card img { max-width: 100%; height: 160px; object-fit: cover; border-radius: 5px; }
         
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        table, th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        table, th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 0.95rem; }
         th { background: #f2f2f2; }
 
         .status-active { color: green; font-weight: bold; }
         .status-expired { color: red; font-weight: bold; }
         .alert-popup { background: #ffcccc; color: #cc0000; padding: 10px; border-radius: 5px; margin-bottom: 15px; }
         
-        .admin-bar { margin-bottom: 20px; padding: 12px; background: #e9ecef; border-radius: 6px; display: flex; gap: 10px; align-items: center; }
+        .admin-bar { margin-bottom: 20px; padding: 12px; background: #e9ecef; border-radius: 6px; display: flex; gap: 15px; align-items: center; }
         .btn-admin { padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; font-weight: bold; }
+
+        .form-box { background: #f8f9fa; padding: 15px; border-radius: 6px; border: 1px solid #ddd; margin-bottom: 20px; }
+        .form-box input, .form-box select { padding: 8px; margin: 5px 5px 5px 0; width: 220px; border: 1px solid #ccc; border-radius: 4px; }
+        .form-box button { padding: 8px 15px; background: #004488; color: white; border: none; border-radius: 4px; cursor: pointer; }
 
         .modal { display: none; position: fixed; z-index: 10; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
         .modal-content { background: white; padding: 30px; border-radius: 8px; width: 420px; text-align: center; }
-        .modal-content input, .modal-content select, .modal-content textarea { width: 90%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 4px; }
+        .modal-content input { width: 90%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 4px; }
         .modal-content button { padding: 10px 20px; background: #004488; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 5px; }
     </style>
 </head>
 <body>
 
     <header>
-        <h2>CÔNG TY TNHH THIẾT Bị ĐIỆN & NLMT</h2>
+        <h2>THIẾT BỊ ĐIỆN & NLMT</h2>
         <nav class="menu">
             <a id="m-products" onclick="switchTab('products')" class="active-tab">Sản Phẩm</a>
             <a id="m-services" onclick="switchTab('services')">Dịch Vụ</a>
-            <a id="m-projects" onclick="switchTab('projects')">Khách Hàng Dự Án</a>
+            <a id="m-projects" onclick="switchTab('projects')">Dự Án</a>
             
             <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
-                <a id="m-quotes" onclick="switchTab('quotes')" style="color:#ffcc00;">Báo Giá & Xuất Kho</a>
+                <a id="m-quotes" onclick="switchTab('quotes')" style="color:#ffcc00;">Báo Giá & Kho</a>
                 <a id="m-expenses" onclick="switchTab('expenses')" style="color:#ffcc00;">Chi Phí & Doanh Thu</a>
-                <a onclick="openAdminPanel()" style="color: #00ffcc;">Quản Trị Tài Khoản</a>
+                <a onclick="openAdminPanel()" style="color: #00ffcc;">Quản Trị</a>
                 <a onclick="logout()" style="color: #ff9999;">Đăng Xuất</a>
             <% } else { %>
                 <a onclick="openLoginModal()" style="color: #ffcc00;">Đăng Nhập Admin</a>
@@ -68,7 +74,7 @@
         <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
             <div class="admin-bar">
                 <strong>QUẢN TRỊ ADMIN:</strong>
-                <a href="/api/export-revenue-excel" class="btn-admin" style="background: #17a2b8;">📥 Xuất Báo Cáo Doanh Thu & Chi Phí (Excel)</a>
+                <a href="/api/export-revenue-excel" class="btn-admin" style="background: #17a2b8;">📥 Xuất Báo Cáo Excel Doanh Thu & Chi Phí</a>
             </div>
         <% } %>
 
@@ -146,7 +152,7 @@
         <!-- TAB 4: BÁO GIÁ & XUẤT KHO (Dành cho Admin) -->
         <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
             <div id="tab-quotes" class="tab-content">
-                <h3>Quản Lý Báo Giá & Phiếu Xuất Kho</h3>
+                <h3>Quản Lý Báo Giá & Xuất Kho</h3>
                 <table>
                     <thead>
                         <tr>
@@ -173,7 +179,18 @@
 
             <!-- TAB 5: CHI PHÍ & DOANH THU (Dành cho Admin) -->
             <div id="tab-expenses" class="tab-content">
-                <h3>Thống Kê Chi Phí & Doanh Thu</h3>
+                <h3>Quản Lý Chi Phí & Doanh Thu</h3>
+                
+                <!-- Form nhập liệu chi phí trực tiếp -->
+                <div class="form-box">
+                    <h4>➕ Thêm Khoản Chi Phí Mới</h4>
+                    <input type="text" id="expType" placeholder="Loại chi phí (VD: Vật tư, Vận chuyển)">
+                    <input type="text" id="expDesc" placeholder="Mô tả chi tiết">
+                    <input type="number" id="expAmount" placeholder="Số tiền (VNĐ)">
+                    <input type="date" id="expDate">
+                    <button onclick="addExpense()">Lưu Chi Phí</button>
+                </div>
+
                 <table>
                     <thead>
                         <tr>
@@ -296,6 +313,26 @@
                 window.location.reload();
             } else {
                 alert('Lỗi: ' + data.message);
+            }
+        }
+
+        async function addExpense() {
+            const expense_type = document.getElementById('expType').value;
+            const description = document.getElementById('expDesc').value;
+            const amount = document.getElementById('expAmount').value;
+            const expense_date = document.getElementById('expDate').value;
+
+            const res = await fetch('/api/expenses/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ expense_type, description, amount, expense_date })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert('Thêm chi phí thành công!');
+                window.location.reload();
+            } else {
+                alert('Lỗi: ' + (data.message || 'Không thể thêm chi phí'));
             }
         }
     </script>
