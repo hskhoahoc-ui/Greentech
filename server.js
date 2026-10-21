@@ -1,0 +1,159 @@
+const express = require('express');
+const ExcelJS = require('exceljs');
+const supabase = require('./supabaseClient');
+require('dotenv').config();
+
+const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
+app.set('view engine', 'ejs');
+
+// Middleware kiểm tra Admin (mô phỏng đơn giản)
+let isAdminLoggedIn = false;
+
+app.post('/api/login-admin', (req, res) => {
+    const { username, password } = req.body;
+    if (username === 'admin' && password === 'admin123') {
+        isAdminLoggedIn = true;
+        res.json({ success: true });
+    } else {
+        res.json({ success: false, message: 'Sai thông tin đăng nhập' });
+    }
+});
+
+// --- TRANG CHỦ & DANH MỤC KHÁCH XEM ---
+app.get('/', async (req, res) => {
+    const { data: categories } = await supabase.from('categories').select('*');
+    const { data: services } = await supabase.from('services').select('*');
+    const { data: projects } = await supabase.from('project_customers').select('*');
+
+    // Tính trạng thái bảo hành
+    const now = new Date();
+    const updatedProjects = (projects || []).map(p => {
+        const compDate = new Date(p.completion_date);
+        const expiryDate = new Date(compDate.setMonth(compDate.getMonth() + p.warranty_months));
+        const isExpired = now > expiryDate;
+        return { ...p, isExpired, expiryDate: expiryDate.toISOString().split('T')[0] };
+    });
+
+    res.render('index', { 
+        categories, 
+        services: services || [], 
+        projects: updatedProjects,
+        isAdmin: isAdminLoggedIn 
+    });
+});
+
+// Web con: Hiển thị sản phẩm theo danh mục (Lưới 3 ô / dòng, Không hiển thị giá nhập)
+app.get('/category/:id', async (req, res) => {
+    const categoryId = req.params.id;
+    const { data: category } = await supabase.from('categories').select('*').eq('id', categoryId).single();
+    const { data: products } = await supabase.from('products').select('id, name, image_url, description, quantity, selling_price').eq('category_id', categoryId);
+
+    res.render('category', { category, products: products || [] });
+});
+
+// --- TAB CHI PHÍ & DOANH THU EXCEL EXPORT ---
+app.get('/api/export-revenue-excel', async (req, res) => {
+    const { startDate, endDate } = req.query;
+
+    const workbook = new ExcelJS.Workbook();
+
+    // Sheet 1: Dự án / Doanh thu
+    const sheetRevenue = workbook.addWorksheet('Doanh Thu Dự Án');
+    sheetRevenue.columns = [
+        { header: 'Mã Dự Án/Báo Giá', key: 'code', width: 20 },
+        { header: 'Khách Hàng', key: 'customer', width: 25 },
+        { header: 'Nội Dung/Tên Dự Án', key: 'project', width: 30 },
+        { header: 'Địa Chỉ', key: 'address', width: 30 },
+        { header: 'Số Tiền', key: 'amount', width: 15 }
+    ];
+
+    let queryQuotes = supabase.from('quotes').select('*');
+    if (startDate) queryQuotes = queryQuotes.gte('created_at', startDate);
+    if (endDate) queryQuotes = queryQuotes.lte('created_at', endDate);
+    const { data: quotes } = await queryQuotes;
+
+    (quotes || []).forEach(q => {
+        sheetRevenue.addRow({
+            code: q.quote_code,
+            customer: q.customer_name,
+            project: q.project_name,
+            address: q.address,
+            amount: q.total_amount
+        });
+    });
+
+    // Sheet 2: Chi phí
+    const sheetExpense = workbook.addWorksheet('Chi Phí');
+    sheetExpense.columns = [
+        { header: 'Loại Chi Phí', key: 'type', width: 25 },
+        { header: 'Mô Tả Chi Tiết', key: 'desc', width: 35 },
+        { header: 'Số Tiền', key: 'amount', width: 15 },
+        { header: 'Ngày Nhập', key: 'date', width: 20 }
+    ];
+
+    let queryExp = supabase.from('expenses').select('*');
+    if (startDate) queryExp = queryExp.gte('expense_date', startDate);
+    if (endDate) queryExp = queryExp.lte('expense_date', endDate);
+    const { data: expenses } = await queryExp;
+
+    (expenses || []).forEach(e => {
+        sheetExpense.addRow({
+            type: e.expense_type,
+            desc: e.description,
+            amount: e.amount,
+            date: e.expense_date
+        });
+    });
+
+    // Sheet 3: Tổng Hợp Lợi Nhuận
+    const sheetProfit = workbook.addWorksheet('Tổng Hợp Lợi Nhuận');
+    const totalRev = (quotes || []).reduce((sum, item) => sum + Number(item.total_amount || 0), 0);
+    const totalExp = (expenses || []).reduce((sum, item) => sum + Number(item.amount || 0), 0);
+    
+    sheetProfit.addRow(['TỔNG DOANH THU', totalRev]);
+    sheetProfit.addRow(['TỔNG CHI PHÍ', totalExp]);
+    sheetProfit.addRow(['TỔNG LỢI NHUẬN', totalRev - totalExp]);
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename=' + 'Bao_Cao_Doanh_Thu.xlsx');
+
+    await workbook.xlsx.write(res);
+    res.end();
+});
+
+// --- API XUẤT KHO VÀ GIẢM TRỪ TỒN KHO ---
+app.post('/api/export-warehouse', async (req, res) => {
+    const { quote_id, customer_name, address, phone, project_name, items } = req.body;
+    const ticket_code = 'PXK-' + Date.now();
+
+    // 1. Tạo phiếu xuất
+    const { data: ticket, error } = await supabase.from('export_tickets').insert([{
+        ticket_code, quote_id: quote_id || null, customer_name, address, phone, project_name
+    }]).select().single();
+
+    if (error) return res.status(500).json({ error: error.message });
+
+    // 2. Thêm items & trừ tồn kho
+    for (const item of items) {
+        await supabase.from('export_items').insert([{
+            export_id: ticket.id,
+            product_id: item.product_id,
+            quantity: item.quantity
+        }]);
+
+        // Giảm tồn kho sản phẩm trong DB
+        const { data: prod } = await supabase.from('products').select('quantity').eq('id', item.product_id).single();
+        if (prod) {
+            const newQty = Math.max(0, prod.quantity - item.quantity);
+            await supabase.from('products').update({ quantity: newQty }).eq('id', item.product_id);
+        }
+    }
+
+    res.json({ success: true, ticket_code });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
