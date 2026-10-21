@@ -7,8 +7,8 @@
         body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f6f9; }
         header { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background: #004488; color: white; flex-wrap: wrap; }
         header h2 { font-size: 1.2rem; margin: 0; }
-        nav.menu { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-        nav.menu a { color: white; text-decoration: none; font-size: 0.9rem; font-weight: bold; cursor: pointer; padding: 6px 10px; border-radius: 4px; background: rgba(255,255,255,0.1); }
+        nav.menu { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        nav.menu a { color: white; text-decoration: none; font-size: 0.85rem; font-weight: bold; cursor: pointer; padding: 6px 8px; border-radius: 4px; background: rgba(255,255,255,0.1); }
         nav.menu a:hover, nav.menu a.active-tab { background: #002244; color: #ffcc00; }
         
         .container { max-width: 1200px; margin: 25px auto; padding: 0 20px; }
@@ -27,15 +27,12 @@
         .status-expired { color: red; font-weight: bold; }
         .alert-popup { background: #ffcccc; color: #cc0000; padding: 10px; border-radius: 5px; margin-bottom: 15px; }
         
-        .admin-bar { margin-bottom: 20px; padding: 12px; background: #e9ecef; border-radius: 6px; display: flex; gap: 15px; align-items: center; }
-        .btn-admin { padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; font-weight: bold; }
-
         .form-box { background: #f8f9fa; padding: 15px; border-radius: 6px; border: 1px solid #ddd; margin-bottom: 20px; }
-        .form-box input, .form-box select { padding: 8px; margin: 5px 5px 5px 0; width: 220px; border: 1px solid #ccc; border-radius: 4px; }
+        .form-box input { padding: 8px; margin: 5px 5px 5px 0; width: 200px; border: 1px solid #ccc; border-radius: 4px; }
         .form-box button { padding: 8px 15px; background: #004488; color: white; border: none; border-radius: 4px; cursor: pointer; }
 
         .modal { display: none; position: fixed; z-index: 10; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
-        .modal-content { background: white; padding: 30px; border-radius: 8px; width: 420px; text-align: center; }
+        .modal-content { background: white; padding: 30px; border-radius: 8px; width: 400px; text-align: center; }
         .modal-content input { width: 90%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 4px; }
         .modal-content button { padding: 10px 20px; background: #004488; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 5px; }
     </style>
@@ -50,31 +47,26 @@
             <a id="m-projects" onclick="switchTab('projects')">Dự Án</a>
             
             <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
-                <a id="m-quotes" onclick="switchTab('quotes')" style="color:#ffcc00;">Báo Giá & Kho</a>
-                <a id="m-expenses" onclick="switchTab('expenses')" style="color:#ffcc00;">Chi Phí & Doanh Thu</a>
+                <a id="m-quotes" onclick="switchTab('quotes')" style="color:#ffcc00;">Báo Giá</a>
+                <a id="m-warehouse" onclick="switchTab('warehouse')" style="color:#ffcc00;">Xuất Kho</a>
+                <a id="m-inventory" onclick="switchTab('inventory')" style="color:#ffcc00;">Tồn Kho</a>
+                <a id="m-revenue" onclick="switchTab('revenue')" style="color:#ffcc00;">Doanh Thu</a>
+                <a id="m-expenses" onclick="switchTab('expenses')" style="color:#ffcc00;">Chi Phí</a>
                 <a onclick="openAdminPanel()" style="color: #00ffcc;">Quản Trị</a>
                 <a onclick="logout()" style="color: #ff9999;">Đăng Xuất</a>
             <% } else { %>
-                <a onclick="openLoginModal()" style="color: #ffcc00;">Đăng Nhập Admin</a>
+                <a onclick="openLoginModal()" style="color: #ffcc00;">Đăng Nhập</a>
             <% } %>
         </nav>
     </header>
 
     <div class="container">
         
-        <!-- Cảnh báo bảo hành -->
         <% const safeProjects = projects || []; %>
         <% const expiredProjects = safeProjects.filter(p => p.isExpired); %>
         <% if (expiredProjects.length > 0) { %>
             <div class="alert-popup">
-                <strong>🔔 THÔNG BÁO BẢO HÀNH:</strong> Có <%= expiredProjects.length %> dự án đã hết hạn bảo hành/bảo dưỡng!
-            </div>
-        <% } %>
-
-        <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
-            <div class="admin-bar">
-                <strong>QUẢN TRỊ ADMIN:</strong>
-                <a href="/api/export-revenue-excel" class="btn-admin" style="background: #17a2b8;">📥 Xuất Báo Cáo Excel Doanh Thu & Chi Phí</a>
+                <strong>🔔 THÔNG BÁO BẢO HÀNH:</strong> Có <%= expiredProjects.length %> dự án đã hết hạn bảo hành!
             </div>
         <% } %>
 
@@ -96,58 +88,42 @@
             <h3>Quản Lý Dịch Vụ Nổi Bật</h3>
             <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
                 <div class="form-box">
-                    <h4>➕ Thêm Dịch Vụ Mới</h4>
-                    <input type="text" id="sType" placeholder="Loại Dịch Vụ">
-                    <input type="text" id="sContent" placeholder="Nội Dung">
-                    <input type="text" id="sWarranty" placeholder="Bảo Hành / Bảo Dưỡng">
+                    <h4>➕ Thêm Dịch Vụ</h4>
+                    <input type="text" id="sType" placeholder="Loại dịch vụ">
+                    <input type="text" id="sContent" placeholder="Nội dung">
+                    <input type="text" id="sWarranty" placeholder="Bảo hành / Bảo dưỡng">
                     <input type="number" id="sPrice" placeholder="Giá (VNĐ)">
                     <button onclick="addService()">Lưu Dịch Vụ</button>
                 </div>
             <% } %>
             <table>
                 <thead>
-                    <tr>
-                        <th>Loại Dịch Vụ</th>
-                        <th>Nội Dung</th>
-                        <th>Bảo Hành / Bảo Dưỡng</th>
-                        <th>Giá</th>
-                    </tr>
+                    <tr><th>Loại Dịch Vụ</th><th>Nội Dung</th><th>Bảo Hành</th><th>Giá</th></tr>
                 </thead>
                 <tbody>
                     <% (services || []).forEach(s => { %>
-                        <tr>
-                            <td><%= s.service_type %></td>
-                            <td><%= s.content %></td>
-                            <td><%= s.warranty_maintenance %></td>
-                            <td><%= Number(s.price || 0).toLocaleString('vi-VN') %> VNĐ</td>
-                        </tr>
+                        <tr><td><%= s.service_type %></td><td><%= s.content %></td><td><%= s.warranty_maintenance %></td><td><%= Number(s.price || 0).toLocaleString('vi-VN') %> VNĐ</td></tr>
                     <% }) %>
                 </tbody>
             </table>
         </div>
 
-        <!-- TAB 3: KHÁCH HÀNG DỰ ÁN -->
+        <!-- TAB 3: DỰ ÁN -->
         <div id="tab-projects" class="tab-content">
             <h3>Quản Lý Khách Hàng Dự Án & Bảo Hành</h3>
             <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
                 <div class="form-box">
-                    <h4>➕ Thêm Dự Án Khách Hàng Mới</h4>
+                    <h4>➕ Thêm Dự Án Mới</h4>
                     <input type="text" id="pCustName" placeholder="Tên Khách Hàng">
                     <input type="text" id="pProjName" placeholder="Tên Dự Án">
-                    <input type="date" id="pCompDate" placeholder="Ngày Hoàn Công">
-                    <input type="number" id="pWarrantyMos" placeholder="Số tháng bảo hành">
+                    <input type="date" id="pCompDate">
+                    <input type="number" id="pWarrantyMos" placeholder="Số tháng BH">
                     <button onclick="addProject()">Lưu Dự Án</button>
                 </div>
             <% } %>
             <table>
                 <thead>
-                    <tr>
-                        <th>Tên Khách Hàng</th>
-                        <th>Tên Dự Án</th>
-                        <th>Thời Gian Hoàn Công</th>
-                        <th>Hạn Bảo Hành</th>
-                        <th>Trạng Thái</th>
-                    </tr>
+                    <tr><th>Tên Khách Hàng</th><th>Tên Dự Án</th><th>Ngày Hoàn Công</th><th>Hạn Bảo Hành</th><th>Trạng Thái</th></tr>
                 </thead>
                 <tbody>
                     <% safeProjects.forEach(p => { %>
@@ -156,84 +132,117 @@
                             <td><%= p.project_name %></td>
                             <td><%= p.completion_date %></td>
                             <td class="<%= p.isExpired ? 'status-expired' : 'status-active' %>"><%= p.expiryDate %></td>
-                            <td>
-                                <% if (p.isExpired) { %>
-                                    <span class="status-expired">Đã Hết Bảo Hành</span>
-                                <% } else { %>
-                                    <span class="status-active">Còn Bảo Hành</span>
-                                <% } %>
-                            </td>
+                            <td><%= p.isExpired ? 'Đã Hết Bảo Hành' : 'Còn Bảo Hành' %></td>
                         </tr>
                     <% }) %>
                 </tbody>
             </table>
         </div>
 
-        <!-- TAB 4: BÁO GIÁ & XUẤT KHO (Dành cho Admin) -->
         <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
+            <!-- TAB 4: BÁO GIÁ -->
             <div id="tab-quotes" class="tab-content">
-                <h3>Tạo Báo Giá & Xuất Kho</h3>
+                <h3>Quản Lý Báo Giá</h3>
                 <div class="form-box">
-                    <h4>➕ Lập Phiếu Báo Giá Mới</h4>
-                    <input type="text" id="qCode" placeholder="Mã Báo Giá (VD: Q-001)">
+                    <h4>➕ Lập Báo Giá Mới</h4>
+                    <input type="text" id="qCode" placeholder="Mã Báo Giá">
                     <input type="text" id="qCust" placeholder="Tên Khách Hàng">
                     <input type="text" id="qProj" placeholder="Tên Dự Án">
-                    <input type="text" id="qAddress" placeholder="Địa chỉ công trình">
+                    <input type="text" id="qAddress" placeholder="Địa chỉ">
                     <input type="number" id="qAmount" placeholder="Tổng tiền (VNĐ)">
                     <button onclick="addQuote()">Tạo Báo Giá</button>
                 </div>
                 <table>
                     <thead>
-                        <tr>
-                            <th>Mã Báo Giá</th>
-                            <th>Khách Hàng</th>
-                            <th>Dự Án</th>
-                            <th>Tổng Tiền</th>
-                            <th>Ngày Tạo</th>
-                        </tr>
+                        <tr><th>Mã Báo Giá</th><th>Khách Hàng</th><th>Dự Án</th><th>Tổng Tiền</th><th>Ngày Tạo</th></tr>
                     </thead>
                     <tbody>
                         <% (quotes || []).forEach(q => { %>
+                            <tr><td><%= q.quote_code %></td><td><%= q.customer_name %></td><td><%= q.project_name %></td><td><%= Number(q.total_amount || 0).toLocaleString('vi-VN') %> VNĐ</td><td><%= new Date(q.created_at).toLocaleDateString('vi-VN') %></td></tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- TAB 5: XUẤT KHO -->
+            <div id="tab-warehouse" class="tab-content">
+                <h3>Quản Lý Phiếu Xuất Kho</h3>
+                <div class="form-box">
+                    <h4>➕ Lập Phiếu Xuất Kho Mới</h4>
+                    <input type="text" id="wCust" placeholder="Tên Khách Hàng">
+                    <input type="text" id="wProj" placeholder="Tên Dự Án">
+                    <input type="text" id="wAddress" placeholder="Địa chỉ giao">
+                    <input type="text" id="wPhone" placeholder="Số điện thoại">
+                    <button onclick="addWarehouseTicket()">Tạo Phiếu Xuất</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr><th>Mã Phiếu Xuất</th><th>Khách Hàng</th><th>Dự Án</th><th>Địa Chỉ</th><th>Ngày Xuất</th></tr>
+                    </thead>
+                    <tbody>
+                        <% (exportTickets || []).forEach(t => { %>
+                            <tr><td><%= t.ticket_code %></td><td><%= t.customer_name %></td><td><%= t.project_name %></td><td><%= t.address %></td><td><%= new Date(t.created_at).toLocaleDateString('vi-VN') %></td></tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- TAB 6: TỒN KHO -->
+            <div id="tab-inventory" class="tab-content">
+                <h3>Quản Lý & Kiểm Tra Tồn Kho Vật Tư/Sản Phẩm</h3>
+                <table>
+                    <thead>
+                        <tr><th>Tên Sản Phẩm</th><th>Mô Tả</th><th>Số Lượng Tồn Kho</th><th>Giá Bán</th></tr>
+                    </thead>
+                    <tbody>
+                        <% (products || []).forEach(prod => { %>
                             <tr>
-                                <td><%= q.quote_code %></td>
-                                <td><%= q.customer_name %></td>
-                                <td><%= q.project_name %></td>
-                                <td><%= Number(q.total_amount || 0).toLocaleString('vi-VN') %> VNĐ</td>
-                                <td><%= new Date(q.created_at).toLocaleDateString('vi-VN') %></td>
+                                <td><%= prod.name %></td>
+                                <td><%= prod.description %></td>
+                                <td><strong style="color: <%= prod.quantity > 5 ? 'green' : 'red' %>;"><%= prod.quantity || 0 %></strong></td>
+                                <td><%= Number(prod.selling_price || 0).toLocaleString('vi-VN') %> VNĐ</td>
                             </tr>
                         <% }) %>
                     </tbody>
                 </table>
             </div>
 
-            <!-- TAB 5: CHI PHÍ & DOANH THU (Dành cho Admin) -->
+            <!-- TAB 7: DOANH THU -->
+            <div id="tab-revenue" class="tab-content">
+                <h3>Quản Lý Doanh Thu Dự Án</h3>
+                <div style="margin-bottom: 20px;">
+                    <a href="/api/export-revenue-excel" class="form-box" style="background:#17a2b8; color:white; padding:10px 20px; text-decoration:none; display:inline-block; border-radius:4px; font-weight:bold;">📥 Xuất Báo Cáo Doanh Thu & Chi Phí (Excel)</a>
+                </div>
+                <table>
+                    <thead>
+                        <tr><th>Mã Báo Giá</th><th>Khách Hàng</th><th>Dự Án</th><th>Doanh Thu</th></tr>
+                    </thead>
+                    <tbody>
+                        <% (quotes || []).forEach(q => { %>
+                            <tr><td><%= q.quote_code %></td><td><%= q.customer_name %></td><td><%= q.project_name %></td><td><%= Number(q.total_amount || 0).toLocaleString('vi-VN') %> VNĐ</td></tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- TAB 8: CHI PHÍ -->
             <div id="tab-expenses" class="tab-content">
-                <h3>Quản Lý Chi Phí & Doanh Thu</h3>
+                <h3>Quản Lý Chi Phí Doanh Nghiệp</h3>
                 <div class="form-box">
-                    <h4>➕ Thêm Khoản Chi Phí Mới</h4>
-                    <input type="text" id="expType" placeholder="Loại chi phí (VD: Vật tư)">
-                    <input type="text" id="expDesc" placeholder="Mô tả chi tiết">
+                    <h4>➕ Thêm Khoản Chi Phí</h4>
+                    <input type="text" id="expType" placeholder="Loại chi phí">
+                    <input type="text" id="expDesc" placeholder="Mô tả">
                     <input type="number" id="expAmount" placeholder="Số tiền (VNĐ)">
                     <input type="date" id="expDate">
                     <button onclick="addExpense()">Lưu Chi Phí</button>
                 </div>
                 <table>
                     <thead>
-                        <tr>
-                            <th>Loại Chi Phí</th>
-                            <th>Mô Tả</th>
-                            <th>Số Tiền</th>
-                            <th>Ngày Nhập</th>
-                        </tr>
+                        <tr><th>Loại Chi Phí</th><th>Mô Tả</th><th>Số Tiền</th><th>Ngày Nhập</th></tr>
                     </thead>
                     <tbody>
                         <% (expenses || []).forEach(e => { %>
-                            <tr>
-                                <td><%= e.expense_type %></td>
-                                <td><%= e.description %></td>
-                                <td><%= Number(e.amount || 0).toLocaleString('vi-VN') %> VNĐ</td>
-                                <td><%= e.expense_date %></td>
-                            </tr>
+                            <tr><td><%= e.expense_type %></td><td><%= e.description %></td><td><%= Number(e.amount || 0).toLocaleString('vi-VN') %> VNĐ</td><td><%= e.expense_date %></td></tr>
                         <% }) %>
                     </tbody>
                 </table>
@@ -242,7 +251,7 @@
 
     </div>
 
-    <!-- Modal Đăng nhập -->
+    <!-- Modals -->
     <div id="loginModal" class="modal">
         <div class="modal-content">
             <h3>Đăng Nhập Quản Trị</h3>
@@ -253,22 +262,13 @@
         </div>
     </div>
 
-    <!-- Modal Admin -->
     <div id="adminPanelModal" class="modal">
         <div class="modal-content">
-            <h3>Quản Trị Tài Khoản Admin</h3>
-            <hr>
-            <h4>Đổi Mật Khẩu</h4>
+            <h3>Đổi Mật Khẩu Admin</h3>
             <input type="password" id="oldPassword" placeholder="Mật khẩu cũ"><br>
             <input type="password" id="newPassword" placeholder="Mật khẩu mới"><br>
             <button onclick="changePassword()">Cập Nhật</button>
-            <hr>
-            <h4>Tạo Admin Mới</h4>
-            <input type="text" id="newAdminUser" placeholder="Tài khoản mới"><br>
-            <input type="password" id="newAdminPass" placeholder="Mật khẩu mới"><br>
-            <button onclick="createAdmin()" style="background: #28a745;">Tạo Tài Khoản</button>
-            <br><br>
-            <button onclick="closeAdminPanel()" style="background: #6c757d;">Đóng</button>
+            <button onclick="closeAdminPanel()" style="background: #6c757d; margin-top:5px;">Đóng</button>
         </div>
     </div>
 
@@ -276,32 +276,24 @@
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.menu a').forEach(el => el.classList.remove('active-tab'));
-            
             const targetTab = document.getElementById('tab-' + tabName);
             const targetMenu = document.getElementById('m-' + tabName);
-            
             if (targetTab) targetTab.classList.add('active');
             if (targetMenu) targetMenu.classList.add('active-tab');
         }
 
         function openLoginModal() { document.getElementById('loginModal').style.display = 'flex'; }
         function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; }
+        function openAdminPanel() { document.getElementById('adminPanelModal').style.display = 'flex'; }
+        function closeAdminPanel() { document.getElementById('adminPanelModal').style.display = 'none'; }
 
         async function submitLogin() {
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value.trim();
-            const res = await fetch('/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
-            });
+            const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password }) });
             const data = await res.json();
-            if (data.success) {
-                alert('Đăng nhập thành công!');
-                window.location.reload();
-            } else {
-                alert(data.message);
-            }
+            if (data.success) { alert('Đăng nhập thành công!'); window.location.reload(); }
+            else { alert(data.message); }
         }
 
         async function logout() {
@@ -309,106 +301,49 @@
             window.location.reload();
         }
 
-        function openAdminPanel() { document.getElementById('adminPanelModal').style.display = 'flex'; }
-        function closeAdminPanel() { document.getElementById('adminPanelModal').style.display = 'none'; }
-
-        async function changePassword() {
-            const oldPassword = document.getElementById('oldPassword').value;
-            const newPassword = document.getElementById('newPassword').value;
-            const res = await fetch('/api/change-password', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ oldPassword, newPassword })
-            });
-            const data = await res.json();
-            alert(data.message);
-            if (data.success) window.location.reload();
-        }
-
-        async function createAdmin() {
-            const username = document.getElementById('newAdminUser').value;
-            const password = document.getElementById('newAdminPass').value;
-            const res = await fetch('/api/users/save', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
-            });
-            const data = await res.json();
-            if (data.success) {
-                alert('Tạo tài khoản quản trị thành công!');
-                window.location.reload();
-            } else {
-                alert('Lỗi: ' + data.message);
-            }
-        }
-
         async function addService() {
-            const service_type = document.getElementById('sType').value;
-            const content = document.getElementById('sContent').value;
-            const warranty_maintenance = document.getElementById('sWarranty').value;
-            const price = document.getElementById('sPrice').value;
-
             const res = await fetch('/api/services/save', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ service_type, content, warranty_maintenance, price })
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ service_type: document.getElementById('sType').value, content: document.getElementById('sContent').value, warranty_maintenance: document.getElementById('sWarranty').value, price: document.getElementById('sPrice').value })
             });
             const data = await res.json();
-            if (data.success) { alert('Thêm dịch vụ thành công!'); window.location.reload(); }
-            else { alert('Lỗi: ' + data.message); }
+            if (data.success) { alert('Thành công!'); window.location.reload(); } else { alert(data.message); }
         }
 
         async function addProject() {
-            const customer_name = document.getElementById('pCustName').value;
-            const project_name = document.getElementById('pProjName').value;
-            const completion_date = document.getElementById('pCompDate').value;
-            const warranty_months = document.getElementById('pWarrantyMos').value;
-
             const res = await fetch('/api/projects/save', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ customer_name, project_name, completion_date, warranty_months })
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ customer_name: document.getElementById('pCustName').value, project_name: document.getElementById('pProjName').value, completion_date: document.getElementById('pCompDate').value, warranty_months: document.getElementById('pWarrantyMos').value })
             });
             const data = await res.json();
-            if (data.success) { alert('Thêm dự án thành công!'); window.location.reload(); }
-            else { alert('Lỗi: ' + data.message); }
+            if (data.success) { alert('Thành công!'); window.location.reload(); } else { alert(data.message); }
         }
 
         async function addQuote() {
-            const quote_code = document.getElementById('qCode').value;
-            const customer_name = document.getElementById('qCust').value;
-            const project_name = document.getElementById('qProj').value;
-            const address = document.getElementById('qAddress').value;
-            const total_amount = document.getElementById('qAmount').value;
-
             const res = await fetch('/api/quotes/save', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ quote_code, customer_name, project_name, address, total_amount })
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ quote_code: document.getElementById('qCode').value, customer_name: document.getElementById('qCust').value, project_name: document.getElementById('qProj').value, address: document.getElementById('qAddress').value, total_amount: document.getElementById('qAmount').value })
             });
             const data = await res.json();
-            if (data.success) { alert('Tạo báo giá thành công!'); window.location.reload(); }
-            else { alert('Lỗi: ' + data.message); }
+            if (data.success) { alert('Thành công!'); window.location.reload(); } else { alert(data.message); }
+        }
+
+        async function addWarehouseTicket() {
+            const res = await fetch('/api/export-warehouse', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ customer_name: document.getElementById('wCust').value, project_name: document.getElementById('wProj').value, address: document.getElementById('wAddress').value, phone: document.getElementById('wPhone').value })
+            });
+            const data = await res.json();
+            if (data.success) { alert('Tạo phiếu xuất kho thành công: ' + data.ticket_code); window.location.reload(); } else { alert(data.message); }
         }
 
         async function addExpense() {
-            const expense_type = document.getElementById('expType').value;
-            const description = document.getElementById('expDesc').value;
-            const amount = document.getElementById('expAmount').value;
-            const expense_date = document.getElementById('expDate').value;
-
             const res = await fetch('/api/expenses/save', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ expense_type, description, amount, expense_date })
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ expense_type: document.getElementById('expType').value, description: document.getElementById('expDesc').value, amount: document.getElementById('expAmount').value, expense_date: document.getElementById('expDate').value })
             });
             const data = await res.json();
-            if (data.success) {
-                alert('Thêm chi phí thành công!');
-                window.location.reload();
-            } else {
-                alert('Lỗi: ' + (data.message || 'Không thể thêm chi phí'));
-            }
+            if (data.success) { alert('Thành công!'); window.location.reload(); } else { alert(data.message); }
         }
     </script>
 </body>
