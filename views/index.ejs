@@ -187,23 +187,31 @@
         function openLoginModal() { document.getElementById('loginModal').style.display = 'flex'; }
         function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; }
 
-        async function submitLogin() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const res = await fetch('/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
-            });
-            const data = await res.json();
-            if (data.success) {
-                alert('Đăng nhập thành công!');
-                window.location.reload();
-            } else {
-                alert(data.message);
-            }
-        }
+       async function submitLogin() {
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    
+    if (!usernameInput || !passwordInput) {
+        alert('Không tìm thấy ô nhập thông tin đăng nhập!');
+        return;
+    }
 
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value.trim();
+
+    const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    if (data.success) {
+        alert('Đăng nhập thành công!');
+        window.location.reload();
+    } else {
+        alert(data.message);
+    }
+}
         async function logout() {
             await fetch('/api/logout', { method: 'POST' });
             window.location.reload();
