@@ -49,19 +49,20 @@ app.get('/category/:id', async (req, res) => {
 app.post('/api/login', async (req, res) => {
     try {
         const { username, password } = req.body;
-        
-        // Truy vấn kiểm tra thông tin trong bảng app_users của Supabase
+        console.log("Đang thử đăng nhập với tài khoản:", username, password);
+
         const { data: users, error } = await supabase
             .from('app_users')
             .select('*')
             .eq('username', username)
             .eq('password', password);
         
+        console.log("Kết quả truy vấn Supabase:", users, error);
+
         if (error || !users || users.length === 0) {
             return res.json({ success: false, message: 'Sai tên đăng nhập hoặc mật khẩu!' });
         }
         
-        // Đăng nhập thành công, lưu trạng thái phiên
         isAdminLoggedIn = true;
         currentUsername = users[0].username;
         
@@ -71,7 +72,6 @@ app.post('/api/login', async (req, res) => {
         return res.json({ success: false, message: 'Lỗi hệ thống khi đăng nhập!' });
     }
 });
-
 app.post('/api/logout', (req, res) => {
     isAdminLoggedIn = false;
     currentUsername = null;
