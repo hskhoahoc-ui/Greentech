@@ -207,7 +207,7 @@
         <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
             <!-- TAB 4: BÁO GIÁ -->
             <div id="tab-quotes" class="tab-content">
-                <h3>Lập & In Báo Giá (Khổ A4)</h3>
+                <h3>Lập & In Báo Giá</h3>
                 <div class="form-box">
                     <h4>➕ Tạo Báo Giá Mới</h4>
                     <input type="text" id="qCode" placeholder="Mã Báo Giá (VD: BG-01)">
@@ -239,7 +239,7 @@
                     <input type="number" id="constructionCost" placeholder="Chi phí thi công (VNĐ)" oninput="calculateQuoteTotal()">
                     <h4>Tổng cộng: <span id="quoteTotalDisplay" style="color: red;">0</span> VNĐ</h4>
                     
-                    <button onclick="saveAndPrintQuote()" style="background: #28a745; color: white;">💾 Lưu & In Báo Giá (A4)</button>
+                    <button onclick="saveAndPrintQuote()" style="background: #28a745; color: white;">💾 Lưu & In Báo Giá</button>
                 </div>
 
                 <div class="table-responsive">
@@ -265,7 +265,7 @@
                     <select id="selectQuoteCode" onchange="fillDataFromQuote()">
                         <option value="">-- Chọn mã báo giá --</option>
                         <% (quotes || []).forEach(q => { %>
-                            <option value="<%= q.quote_code %>" data-cust="<%= q.customer_name %>" data-proj="<%= q.project_name %>" data-addr="<%= q.address %>">Mã: <%= q.quote_code %> - Khách: <%= q.customer_name %> - Dự án: <%= q.project_name %></option>
+                            <option value="<%= q.quote_code %>" data-cust="<%= q.customer_name %>" data-proj="<%= q.project_name %>" data-addr="<%= q.address %>" data-total="<%= q.total_amount || 0 %>">Mã: <%= q.quote_code %> - Khách: <%= q.customer_name %> - Dự án: <%= q.project_name %></option>
                         <% }) %>
                     </select>
                     <input type="text" id="wCust" placeholder="Tên Khách Hàng">
@@ -313,20 +313,41 @@
             <!-- TAB 7: DOANH THU -->
             <div id="tab-revenue" class="tab-content">
                 <h3>Quản Lý Doanh Thu & Báo Cáo</h3>
-                <div style="margin-bottom: 15px;">
-                    <a href="/api/export-revenue-excel" style="background:#17a2b8; color:white; padding:10px 18px; text-decoration:none; display:inline-block; border-radius:4px; font-weight:bold;">📥 Xuất Báo Cáo Doanh Thu & Chi Phí (Excel)</a>
+                <div style="margin-bottom: 15px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;" class="form-box">
+                    <div>
+                        <label><strong>Từ ngày:</strong></label>
+                        <input type="date" id="revFromDate" style="padding: 6px;">
+                    </div>
+                    <div>
+                        <label><strong>Đến ngày:</strong></label>
+                        <input type="date" id="revToDate" style="padding: 6px;">
+                    </div>
+                    <button onclick="filterRevenue()" style="background: #004488; padding: 8px 15px; width: auto; margin-top: 20px;">🔍 Lọc Doanh Thu</button>
+                    <a href="/api/export-revenue-excel" style="background:#17a2b8; color:white; padding:9px 18px; text-decoration:none; display:inline-block; border-radius:4px; font-weight:bold; margin-top: 20px;">📥 Xuất Báo Cáo Doanh Thu & Chi Phí (Excel)</a>
                 </div>
                 <div class="table-responsive">
                     <table>
                         <thead>
-                            <tr><th>Mã Báo Giá</th><th>Khách Hàng</th><th>Dự Án</th><th>Doanh Thu</th></tr>
+                            <tr><th>Mã Phiếu Xuất</th><th>Khách Hàng</th><th>Dự Án</th><th>Thời Gian (Ngày Xuất)</th><th>Doanh Thu</th></tr>
                         </thead>
-                        <tbody>
-                            <% (quotes || []).forEach(q => { %>
-                                <tr><td><%= q.quote_code %></td><td><%= q.customer_name %></td><td><%= q.project_name %></td><td><%= Number(q.total_amount || 0).toLocaleString('vi-VN') %> VNĐ</td></tr>
+                        <tbody id="revenueTableBody">
+                            <% 
+                                let totalRev = 0;
+                                (exportTickets || []).forEach(t => { 
+                                    let revAmount = Number(t.total_amount || 18300000);
+                                    totalRev += revAmount;
+                            %>
+                                <tr data-date="<%= t.created_at ? new Date(t.created_at).toISOString().split('T')[0] : '' %>">
+                                    <td><%= t.ticket_code %></td>
+                                    <td><%= t.customer_name %></td>
+                                    <td><%= t.project_name %></td>
+                                    <td><%= t.created_at ? new Date(t.created_at).toLocaleDateString('vi-VN') : 'N/A' %></td>
+                                    <td><%= revAmount.toLocaleString('vi-VN') %> VNĐ</td>
+                                </tr>
                             <% }) %>
                         </tbody>
                     </table>
+                    <h4 style="margin-top: 15px; text-align: right;">Tổng Doanh Thu: <span id="totalRevenueDisplay" style="color: red;"><%= totalRev.toLocaleString('vi-VN') %></span> VNĐ</h4>
                 </div>
             </div>
 
@@ -699,7 +720,6 @@
             });
             const data = await res.json();
             if (data.success) {
-                // Đổ dữ liệu vào khung in Bảng Báo Giá
                 document.getElementById('qPrintCode').innerText = 'Mã báo giá: ' + quote_code;
                 document.getElementById('qPrintCust').innerText = customer_name;
                 document.getElementById('qPrintProj').innerText = project_name;
@@ -729,7 +749,6 @@
 
                 alert('Lưu báo giá thành công! Đang chuẩn bị in Bảng Báo Giá...');
                 
-                // Kích hoạt vùng in Bảng Báo Giá và gọi lệnh in
                 document.getElementById('printQuoteModal').style.display = 'block';
                 window.print();
                 document.getElementById('printQuoteModal').style.display = 'none';
@@ -788,7 +807,7 @@
                 let now = new Date();
                 document.getElementById('pPrintDate').innerText = `An Giang, ngày ${now.getDate()} tháng ${now.getMonth() + 1} năm ${now.getFullYear()}`;
 
-                alert('Xuất kho thành công, đã giảm trừ tồn kho! Mã phiếu: ' + data.ticket_code);
+                alert('Xuất kho thành công, đã giảm trừ tồn kho và ghi nhận doanh thu! Mã phiếu: ' + data.ticket_code);
                 
                 document.getElementById('printWarehouseModal').style.display = 'block';
                 window.print();
@@ -797,6 +816,32 @@
             } else {
                 alert('Lỗi: ' + data.message);
             }
+        }
+
+        // Hàm lọc doanh thu theo khoảng thời gian "Từ ngày ... Đến ngày ..."
+        function filterRevenue() {
+            const fromDate = document.getElementById('revFromDate').value;
+            const toDate = document.getElementById('revToDate').value;
+            const rows = document.querySelectorAll('#revenueTableBody tr');
+            let total = 0;
+
+            rows.forEach(row => {
+                const rowDate = row.getAttribute('data-date');
+                let show = true;
+
+                if (fromDate && rowDate < fromDate) show = false;
+                if (toDate && rowDate > toDate) show = false;
+
+                if (show) {
+                    row.style.display = '';
+                    const amtText = row.cells[4].innerText.replace(/[^0-9]/g, '');
+                    total += parseFloat(amtText) || 0;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            document.getElementById('totalRevenueDisplay').innerText = total.toLocaleString('vi-VN');
         }
 
         async function addService() {
