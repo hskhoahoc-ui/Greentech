@@ -47,9 +47,10 @@
                     <h4><%= p.name %></h4>
                     <p><%= p.description %></p>
                     <div class="price">Giá bán: <%= Number(p.selling_price || 0).toLocaleString('vi-VN') %> VNĐ</div>
-                    <div>Tồn kho: <%= p.quantity || 0 %></div>
-
+                    
+                    <!-- Chỉ hiển thị tồn kho khi tài khoản là Admin -->
                     <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
+                        <div>Tồn kho: <%= p.quantity || 0 %></div>
                         <div class="cost-price" style="margin-top:5px;">Giá nhập: <%= Number(p.cost_price || 0).toLocaleString('vi-VN') %> VNĐ</div>
                         <div style="margin-top: 10px; display: flex; gap: 8px; justify-content: center;">
                             <button class="btn-edit" onclick="editProduct('<%= p.id %>', '<%= p.name %>', '<%= p.description %>', '<%= p.quantity %>', '<%= p.cost_price %>', '<%= p.selling_price %>', '<%= p.image_url %>')">Sửa</button>
