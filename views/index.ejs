@@ -39,7 +39,7 @@
         .status-expired { color: red; font-weight: bold; }
         .alert-popup { background: #ffcccc; color: #cc0000; padding: 12px; border-radius: 5px; margin-bottom: 15px; font-size: 0.9rem; }
         
-        /* Form inputs to rõ dễ bấm trên điện thoại */
+        /* Form inputs */
         .form-box { background: #f8f9fa; padding: 15px; border-radius: 6px; border: 1px solid #ddd; margin-bottom: 15px; }
         .form-box input, .form-box select { padding: 10px; margin: 5px 0; width: 100%; border: 1px solid #ccc; border-radius: 4px; font-size: 0.95rem; }
         .form-box button { padding: 10px 18px; background: #004488; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.95rem; font-weight: bold; margin-top: 5px; width: 100%; }
@@ -52,8 +52,8 @@
         .btn-edit { background: #ffc107; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .btn-delete { background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
 
-        /* Khung Mẫu In Phiếu Xuất Kho chuẩn A4 (Ẩn trên web bình thường, chỉ hiện khi in) */
-        #printWarehouseModal { display: none; }
+        /* Khung In ẩn trên web, chỉ hiện khi gọi in */
+        #printWarehouseModal, #printQuoteModal { display: none; }
 
         @media (min-width: 768px) {
             .form-box button { width: auto; }
@@ -62,9 +62,9 @@
 
         @media print {
             body * { visibility: hidden; }
-            #printWarehouseModal, #printWarehouseModal * { visibility: visible; }
-            #printWarehouseModal { display: block !important; position: absolute; left: 0; top: 0; width: 100%; background: white; padding: 20px; }
-            #tab-quotes, nav, header, .alert-popup, button, .form-box, .table-responsive { display: none !important; }
+            #printWarehouseModal, #printWarehouseModal *, #printQuoteModal, #printQuoteModal * { visibility: visible; }
+            #printWarehouseModal, #printQuoteModal { display: block !important; position: absolute; left: 0; top: 0; width: 100%; background: white; padding: 20px; }
+            nav, header, .alert-popup, button, .form-box, .table-responsive, h3 { display: none !important; }
         }
     </style>
 </head>
@@ -214,6 +214,7 @@
                     <input type="text" id="qCust" placeholder="Tên Khách Hàng">
                     <input type="text" id="qProj" placeholder="Tên Dự Án">
                     <input type="text" id="qAddress" placeholder="Địa chỉ công trình">
+                    <input type="text" id="qPhone" placeholder="Số điện thoại khách hàng">
 
                     <h5 style="margin:10px 0 5px 0;">Chọn Thiết Bị / Vật Tư Từ Kho:</h5>
                     <select id="selectProduct">
@@ -357,7 +358,7 @@
 
     </div>
 
-    <!-- KHUNG MẪU IN PHIẾU XUẤT KHO CHUẨN (A4) -->
+    <!-- KHUNG MẪU IN PHIẾU XUẤT KHO -->
     <div id="printWarehouseModal">
         <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #004488; padding-bottom: 10px; margin-bottom: 15px;">
             <div style="display: flex; align-items: center; gap: 10px;">
@@ -390,9 +391,7 @@
                     <th style="border: 1px solid #333; padding: 6px; text-align: right;">Thành Tiền</th>
                 </tr>
             </thead>
-            <tbody id="pPrintItemsBody">
-                <!-- Dữ liệu vật tư sẽ được tự động đưa vào đây khi in -->
-            </tbody>
+            <tbody id="pPrintItemsBody"></tbody>
         </table>
 
         <div style="display: flex; justify-content: space-between; margin-top: 30px; font-size: 0.9rem; text-align: center;">
@@ -405,8 +404,59 @@
                 <p style="margin: 0; font-style: italic; font-size: 0.8rem;">(Ký, ghi rõ họ tên)</p>
             </div>
             <div style="width: 30%;">
-                <p id="pPrintDate" style="margin: 0; font-style: italic; font-size: 0.85rem;">An Giang, ngày ... tháng ... năm 20...</p>
+                <p id="pPrintDate" style="margin: 0; font-style: italic; font-size: 0.85rem;"></p>
                 <p style="margin: 0; font-weight: bold;">Người nhận hàng</p>
+                <p style="margin: 0; font-style: italic; font-size: 0.8rem;">(Ký, ghi rõ họ tên)</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- KHUNG MẪU IN BẢNG BÁO GIÁ -->
+    <div id="printQuoteModal">
+        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #004488; padding-bottom: 10px; margin-bottom: 15px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <img src="/images/logo.png" style="height: 45px; width: 45px; object-fit: contain;" alt="Logo">
+                <div>
+                    <h4 style="margin: 0; font-size: 0.95rem; text-transform: uppercase; color: #004488;">CÔNG TY TNHH KỸ THUẬT TỰ ĐỘNG HOÁ XANH</h4>
+                    <p style="margin: 2px 0 0 0; font-size: 0.75rem;">Địa chỉ: 263/16, ấp Hoà Đông, xã Phú Hoà, An Giang - SĐT: 0350.274.913</p>
+                </div>
+            </div>
+            <div style="text-align: right;">
+                <h3 style="margin: 0; font-size: 1.2rem; color: #004488;">BẢNG BÁO GIÁ</h3>
+                <p id="qPrintCode" style="margin: 2px 0 0 0; font-size: 0.85rem; font-weight: bold;"></p>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 12px; font-size: 0.9rem; line-height: 1.5;">
+            <p style="margin: 3px 0;"><strong>Khách hàng:</strong> <span id="qPrintCust"></span></p>
+            <p style="margin: 3px 0;"><strong>Tên dự án:</strong> <span id="qPrintProj"></span></p>
+            <p style="margin: 3px 0;"><strong>Địa chỉ công trình:</strong> <span id="qPrintAddress"></span></p>
+            <p style="margin: 3px 0;"><strong>Số điện thoại:</strong> <span id="qPrintPhone"></span></p>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 0.85rem;">
+            <thead>
+                <tr style="background: #f2f2f2;">
+                    <th style="border: 1px solid #333; padding: 6px; text-align: center;">STT</th>
+                    <th style="border: 1px solid #333; padding: 6px;">Tên Thiết Bị / Vật Tư</th>
+                    <th style="border: 1px solid #333; padding: 6px; text-align: center;">Số Lượng</th>
+                    <th style="border: 1px solid #333; padding: 6px; text-align: right;">Đơn Giá</th>
+                    <th style="border: 1px solid #333; padding: 6px; text-align: right;">Thành Tiền</th>
+                </tr>
+            </thead>
+            <tbody id="qPrintItemsBody"></tbody>
+        </table>
+
+        <div style="margin-bottom: 15px; font-size: 0.9rem; text-align: right; line-height: 1.5;">
+            <p style="margin: 2px 0;" id="qPrintSurveyRow">Chi phí khảo sát: <strong id="qPrintSurvey">0</strong> đ</p>
+            <p style="margin: 2px 0;" id="qPrintConstRow">Chi phí thi công: <strong id="qPrintConst">0</strong> đ</p>
+            <h3 style="margin: 5px 0; color: #cc0000;">Tổng cộng: <span id="qPrintTotal">0</span> VNĐ</h3>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; margin-top: 30px; font-size: 0.9rem; text-align: center;">
+            <div style="width: 40%;">
+                <p id="qPrintDate" style="margin: 0; font-style: italic; font-size: 0.85rem;"></p>
+                <p style="margin: 5px 0 0 0; font-weight: bold;">Người lập báo giá</p>
                 <p style="margin: 0; font-style: italic; font-size: 0.8rem;">(Ký, ghi rõ họ tên)</p>
             </div>
         </div>
@@ -632,6 +682,9 @@
             const customer_name = document.getElementById('qCust').value;
             const project_name = document.getElementById('qProj').value;
             const address = document.getElementById('qAddress').value;
+            const phone = document.getElementById('qPhone').value;
+            const survey = parseFloat(document.getElementById('surveyCost').value) || 0;
+            const construction = parseFloat(document.getElementById('constructionCost').value) || 0;
             const total_amount = calculateQuoteTotal();
 
             if (!quote_code || !customer_name) {
@@ -642,12 +695,44 @@
             const res = await fetch('/api/quotes/save', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ quote_code, customer_name, project_name, address, total_amount, items: quoteItemsList })
+                body: JSON.stringify({ quote_code, customer_name, project_name, address, phone, total_amount, items: quoteItemsList })
             });
             const data = await res.json();
             if (data.success) {
-                alert('Lưu báo giá thành công! Đang chuẩn bị in A4...');
+                // Đổ dữ liệu vào khung in Bảng Báo Giá
+                document.getElementById('qPrintCode').innerText = 'Mã báo giá: ' + quote_code;
+                document.getElementById('qPrintCust').innerText = customer_name;
+                document.getElementById('qPrintProj').innerText = project_name;
+                document.getElementById('qPrintAddress').innerText = address;
+                document.getElementById('qPrintPhone').innerText = phone;
+
+                let itemsHtml = '';
+                quoteItemsList.forEach((item, index) => {
+                    let thanhTien = item.qty * item.price;
+                    itemsHtml += `
+                        <tr>
+                            <td style="border: 1px solid #333; padding: 6px; text-align: center;">${index + 1}</td>
+                            <td style="border: 1px solid #333; padding: 6px;">${item.productName}</td>
+                            <td style="border: 1px solid #333; padding: 6px; text-align: center;">${item.qty}</td>
+                            <td style="border: 1px solid #333; padding: 6px; text-align: right;">${item.price.toLocaleString('vi-VN')} đ</td>
+                            <td style="border: 1px solid #333; padding: 6px; text-align: right;">${thanhTien.toLocaleString('vi-VN')} đ</td>
+                        </tr>
+                    `;
+                });
+                document.getElementById('qPrintItemsBody').innerHTML = itemsHtml;
+                document.getElementById('qPrintSurvey').innerText = survey.toLocaleString('vi-VN');
+                document.getElementById('qPrintConst').innerText = construction.toLocaleString('vi-VN');
+                document.getElementById('qPrintTotal').innerText = total_amount.toLocaleString('vi-VN');
+
+                let now = new Date();
+                document.getElementById('qPrintDate').innerText = `An Giang, ngày ${now.getDate()} tháng ${now.getMonth() + 1} năm ${now.getFullYear()}`;
+
+                alert('Lưu báo giá thành công! Đang chuẩn bị in Bảng Báo Giá...');
+                
+                // Kích hoạt vùng in Bảng Báo Giá và gọi lệnh in
+                document.getElementById('printQuoteModal').style.display = 'block';
                 window.print();
+                document.getElementById('printQuoteModal').style.display = 'none';
                 window.location.reload();
             } else {
                 alert('Lỗi: ' + data.message);
@@ -659,7 +744,6 @@
             const project_name = document.getElementById('wProj').value;
             const address = document.getElementById('wAddress').value;
             const phone = document.getElementById('wPhone').value;
-            const quoteCode = document.getElementById('selectQuoteCode').value;
 
             const res = await fetch('/api/export-warehouse', {
                 method: 'POST',
@@ -668,14 +752,12 @@
             });
             const data = await res.json();
             if (data.success) {
-                // Điền dữ liệu trực tiếp vào mẫu in phiếu xuất kho chuẩn
                 document.getElementById('pPrintCode').innerText = 'Mã phiếu: ' + data.ticket_code;
                 document.getElementById('pPrintCust').innerText = customer_name;
                 document.getElementById('pPrintProj').innerText = project_name;
                 document.getElementById('pPrintAddress').innerText = address;
                 document.getElementById('pPrintPhone').innerText = phone;
 
-                // Lấy danh sách vật tư từ báo giá tương ứng (hoặc mặc định nếu xuất kho trực tiếp)
                 let itemsHtml = '';
                 if (quoteItemsList.length > 0) {
                     quoteItemsList.forEach((item, index) => {
@@ -707,7 +789,10 @@
                 document.getElementById('pPrintDate').innerText = `An Giang, ngày ${now.getDate()} tháng ${now.getMonth() + 1} năm ${now.getFullYear()}`;
 
                 alert('Xuất kho thành công, đã giảm trừ tồn kho! Mã phiếu: ' + data.ticket_code);
+                
+                document.getElementById('printWarehouseModal').style.display = 'block';
                 window.print();
+                document.getElementById('printWarehouseModal').style.display = 'none';
                 window.location.reload();
             } else {
                 alert('Lỗi: ' + data.message);
