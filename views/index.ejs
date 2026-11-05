@@ -106,7 +106,7 @@
         <% const expiredProjects = safeProjects.filter(p => p.isExpired); %>
         <% if (expiredProjects.length > 0) { %>
             <div class="alert-popup">
-                <strong>🔔 THÔNG BÁO BẢO HÀNH:</strong> Có <%= expiredProjects.length %> dự án đã hết hạn bảo hành![cite: 3]
+                <strong>🔔 THÔNG BÁO BẢO HÀNH:</strong> Có <%= expiredProjects.length %> dự án đã hết hạn bảo hành!
             </div>
         <% } %>
 
@@ -294,7 +294,14 @@
                 <div class="table-responsive">
                     <table>
                         <thead>
-                            <tr><th>Tên Sản Phẩm</th><th>Mô Tả</th><th>Số Lượng Tồn</th><th>Giá Bán</th></tr>
+                            <tr>
+                                <th>Tên Sản Phẩm</th>
+                                <th>Mô Tả</th>
+                                <th>Số Lượng Tồn</th>
+                                <th>Ngày Nhập</th>
+                                <th>Giá Nhập</th>
+                                <th>Giá Bán</th>
+                            </tr>
                         </thead>
                         <tbody>
                             <% (products || []).forEach(prod => { %>
@@ -302,7 +309,9 @@
                                     <td><%= prod.name %></td>
                                     <td><%= prod.description %></td>
                                     <td><strong style="color: <%= prod.quantity > 5 ? 'green' : 'red' %>;"><%= prod.quantity || 0 %></strong></td>
-                                    <td><%= Number(prod.selling_price || 0).toLocaleString('vi-VN') %> VNĐ</td>
+                                    <td><%= prod.created_at ? new Date(prod.created_at).toLocaleDateString('vi-VN') : (prod.import_date || 'N/A') %></td>
+                                    <td style="color: #6c757d; font-style: italic;"><%= Number(prod.cost_price || 0).toLocaleString('vi-VN') %> VNĐ</td>
+                                    <td style="color: #d9534f; font-weight: bold;"><%= Number(prod.selling_price || 0).toLocaleString('vi-VN') %> VNĐ</td>
                                 </tr>
                             <% }) %>
                         </tbody>
@@ -323,7 +332,8 @@
                         <input type="date" id="revToDate" style="padding: 6px;">
                     </div>
                     <button onclick="filterRevenue()" style="background: #004488; padding: 8px 15px; width: auto; margin-top: 20px;">🔍 Lọc Doanh Thu</button>
-                    <a href="/api/export-revenue-excel" style="background:#17a2b8; color:white; padding:9px 18px; text-decoration:none; display:inline-block; border-radius:4px; font-weight:bold; margin-top: 20px;">📥 Xuất Báo Cáo Doanh Thu & Chi Phí (Excel)</a>
+                    <!-- Nút Xuất Excel tổng hợp 3 phần: Doanh Thu, Chi Phí & Tồn Kho -->
+                    <a href="/api/export-report-excel" style="background:#17a2b8; color:white; padding:9px 18px; text-decoration:none; display:inline-block; border-radius:4px; font-weight:bold; margin-top: 20px;">📥 Xuất Báo Cáo Doanh Thu, Chi Phí & Tồn Kho (Excel)</a>
                 </div>
                 <div class="table-responsive">
                     <table>
@@ -818,7 +828,6 @@
             }
         }
 
-        // Hàm lọc doanh thu theo khoảng thời gian "Từ ngày ... Đến ngày ..."
         function filterRevenue() {
             const fromDate = document.getElementById('revFromDate').value;
             const toDate = document.getElementById('revToDate').value;
